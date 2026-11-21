@@ -375,12 +375,15 @@ public class FileBrowserSelection {
 			shown++;
 		}
 		names.append('\n').append(mActivity.getString(R.string.fb_sel_delete_warning));
-		new AlertDialog.Builder(mActivity)
+		final AlertDialog dlg = new AlertDialog.Builder(mActivity)
 				.setTitle(mActivity.getString(R.string.fb_sel_confirm_delete, items.size()))
 				.setMessage(names.toString())
 				.setPositiveButton(R.string.fb_sel_delete, (d, w) -> doDelete(items))
 				.setNegativeButton(R.string.dlg_button_cancel, null)
-				.show();
+				.create();
+		// destructive action in red
+		dlg.setOnShowListener(d -> dlg.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(0xFFD32F2F));
+		dlg.show();
 	}
 
 	private String displayName(FileInfo item) {
