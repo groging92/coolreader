@@ -328,11 +328,15 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 	public FileInfo getFirstVisibleItem(java.util.Collection<FileInfo> exclude) {
 		if (mListView == null || currentListAdapter == null)
 			return null;
+		// compare by path: FileInfo.equals()/hashCode() walk the whole tree
+		java.util.HashSet<String> excluded = new java.util.HashSet<>();
+		for (FileInfo f : exclude)
+			excluded.add(f.getPathName());
 		int first = mListView.getFirstVisiblePosition();
 		int last = mListView.getLastVisiblePosition();
 		for (int i = first; i <= last && i < currentListAdapter.getCount(); i++) {
 			Object o = currentListAdapter.getItem(i);
-			if (o instanceof FileInfo && !exclude.contains(o))
+			if (o instanceof FileInfo && !excluded.contains(((FileInfo) o).getPathName()))
 				return (FileInfo) o;
 		}
 		return null;

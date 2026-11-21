@@ -488,7 +488,9 @@ public class FileBrowserSelection {
 		new Thread(() -> {
 			// base path (file or archive) -> new base path
 			final Map<String, String> movedBases = new HashMap<>();
-			final LinkedHashMap<FileInfo, String> moved = new LinkedHashMap<>();
+			// FileInfo.hashCode() walks the whole tree: keep moved items in lists, not in a map
+			final ArrayList<FileInfo> movedItems = new ArrayList<>();
+			final ArrayList<String> movedTo = new ArrayList<>();
 			int failed = 0;
 			for (FileInfo item : items) {
 				String base = item.getBasePath();
@@ -512,18 +514,19 @@ public class FileBrowserSelection {
 					newBase = dst.getAbsolutePath();
 					movedBases.put(base, newBase);
 				}
-				moved.put(item, newBase);
+				movedItems.add(item);
+				movedTo.add(newBase);
 			}
 			final int failedCount = failed;
-			BackgroundThread.instance().postGUI(() -> onMoved(moved, destDir, failedCount));
+			BackgroundThread.instance().postGUI(() -> onMoved(movedItems, movedTo, destDir, failedCount));
 		}, "move-books").start();
 	}
 
-	private void onMoved(final LinkedHashMap<FileInfo, String> moved, final File destDir, final int failed) {
+	private void onMoved(final ArrayList<FileInfo> movedItems, final ArrayList<String> movedTo, final File destDir, final int failed) {
 		mActivity.waitForCRDBService(() -> {
-			for (Map.Entry<FileInfo, String> e : moved.entrySet()) {
-				FileInfo item = e.getKey();
-				String newBase = e.getValue();
+			for (int i = 0; i < movedItems.size(); i++) {
+				FileInfo item = movedItems.get(i);
+				String newBase = movedTo.get(i);
 				String oldPathName = item.getPathName();
 				// update DB record first: it takes a copy of the old item
 				mActivity.getDB().moveBookRecord(item, newBase);
@@ -550,10 +553,10 @@ public class FileBrowserSelection {
 			FileInfo destNode = Services.getScanner().findFileInTree(new FileInfo(destDir));
 			if (destNode != null)
 				destNode.isScanned = false;
-			mActivity.showToast(failed == 0 ? mActivity.getString(R.string.fb_sel_moved, moved.size())
-					: mActivity.getString(R.string.fb_sel_moved_failed, moved.size(), failed));
+			mActivity.showToast(failed == 0 ? mActivity.getString(R.string.fb_sel_moved, movedItems.size())
+					: mActivity.getString(R.string.fb_sel_moved_failed, movedItems.size(), failed));
 			finish();
-			refreshCurrentDir(moved.keySet());
+			refreshCurrentDir(movedItems);
 		});
 	}
 
