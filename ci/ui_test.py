@@ -19,7 +19,7 @@ OUT = sys.argv[1]
 APK_DIR = sys.argv[2]
 PKG = "org.coolreader.fork"
 ACTIVITY = PKG + "/org.coolreader.CoolReader"
-BOOKS = "/sdcard/Books/Test"
+BOOKS = "/storage/emulated/0/Books/Test"
 os.makedirs(OUT, exist_ok=True)
 
 report = []
@@ -164,7 +164,7 @@ def main():
     shell("svc power stayon true")
 
     # test books
-    shell("rm -rf /sdcard/Books/Test && mkdir -p %s/Archive" % BOOKS)
+    shell("rm -rf %s && mkdir -p %s/Archive" % (BOOKS, BOOKS))
     os.makedirs("/tmp/books", exist_ok=True)
     for i in range(1, 9):
         p = "/tmp/books/book%02d.fb2" % i

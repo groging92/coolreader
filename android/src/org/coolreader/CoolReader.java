@@ -778,7 +778,13 @@ public class CoolReader extends BaseActivity {
 
 		// fork: open a folder in the file browser (used by automated UI tests and shortcuts)
 		if (intent.getExtras() != null && intent.getExtras().getString(FORK_OPEN_DIR_PARAM) != null) {
-			final String dir = intent.getExtras().getString(FORK_OPEN_DIR_PARAM);
+			String dirParam = intent.getExtras().getString(FORK_OPEN_DIR_PARAM);
+			try {
+				// /sdcard/... -> /storage/emulated/0/..., the path the file tree uses
+				dirParam = new File(dirParam).getCanonicalPath();
+			} catch (Exception ignored) {
+			}
+			final String dir = dirParam;
 			intent.removeExtra(FORK_OPEN_DIR_PARAM);
 			BackgroundThread.instance().postGUI(() -> showBrowser(dir), 300);
 			return true;
