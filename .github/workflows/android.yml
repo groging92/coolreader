@@ -51,9 +51,12 @@ jobs:
           mkdir -p out
           ls -la android/app/build/outputs/apk/release/
           cp android/app/build/outputs/apk/release/*arm64-v8a*.apk out/CoolReaderPlus.apk
+          BT="$ANDROID_HOME/build-tools/35.0.0"
+          "$BT/aapt" dump badging out/CoolReaderPlus.apk | grep -E "^(package|application-label|sdkVersion|targetSdkVersion|native-code|uses-permission: name='android.permission.MANAGE)"
           if ls android/app/build/outputs/apk/release/*unsigned*.apk >/dev/null 2>&1; then
             echo "signed=false" >> "$GITHUB_OUTPUT"
           else
+            "$BT/apksigner" verify --print-certs out/CoolReaderPlus.apk | head -3
             echo "signed=true" >> "$GITHUB_OUTPUT"
           fi
 
