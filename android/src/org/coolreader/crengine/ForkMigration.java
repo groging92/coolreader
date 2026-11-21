@@ -31,8 +31,8 @@ import java.io.Writer;
 import java.util.Date;
 
 /**
- * CoolReader+ keeps its data (books DB, settings, cache) in its own folder
- * /sdcard/.cr3plus, separate from the original Cool Reader's /sdcard/.cr3.
+ * CoolReaderFork keeps its data (books DB, settings, cache) in its own folder
+ * /sdcard/.cr3fork, separate from the original Cool Reader's /sdcard/.cr3.
  *
  * On the first run with storage access, data of the original app is copied once:
  * reading positions, history, statuses, bookmarks, covers and settings.
@@ -42,7 +42,7 @@ public class ForkMigration {
 
 	public static final Logger log = L.create("fork");
 
-	public static final String DATA_DIR_NAME = ".cr3plus";
+	public static final String DATA_DIR_NAME = ".cr3fork";
 	public static final String LEGACY_DATA_DIR_NAME = ".cr3";
 
 	private static final String MARKER_FILE = "migration-from-cr3.txt";

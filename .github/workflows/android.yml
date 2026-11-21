@@ -48,30 +48,30 @@ jobs:
         run: |
           mkdir -p out
           ls -la android/app/build/outputs/apk/release/
-          cp android/app/build/outputs/apk/release/*arm64-v8a*.apk out/CoolReaderPlus.apk
+          cp android/app/build/outputs/apk/release/*arm64-v8a*.apk out/CoolReaderFork.apk
           BT="$ANDROID_HOME/build-tools/35.0.0"
-          "$BT/aapt" dump badging out/CoolReaderPlus.apk | grep -E "^(package|application-label|sdkVersion|targetSdkVersion|native-code|uses-permission: name='android.permission.MANAGE)"
+          "$BT/aapt" dump badging out/CoolReaderFork.apk | grep -E "^(package|application-label|sdkVersion|targetSdkVersion|native-code|uses-permission: name='android.permission.MANAGE)"
           if ls android/app/build/outputs/apk/release/*unsigned*.apk >/dev/null 2>&1; then
             echo "signed=false" >> "$GITHUB_OUTPUT"
           else
-            "$BT/apksigner" verify --print-certs out/CoolReaderPlus.apk | head -3
+            "$BT/apksigner" verify --print-certs out/CoolReaderFork.apk | head -3
             echo "signed=true" >> "$GITHUB_OUTPUT"
           fi
 
       - uses: actions/upload-artifact@v4
         with:
-          name: CoolReaderPlus-${{ github.run_number }}
-          path: out/CoolReaderPlus.apk
+          name: CoolReaderFork-${{ github.run_number }}
+          path: out/CoolReaderFork.apk
 
       - name: Publish release
         if: steps.collect.outputs.signed == 'true'
         uses: softprops/action-gh-release@v2
         with:
           tag_name: build-${{ github.run_number }}
-          name: CoolReader+ build ${{ github.run_number }}
+          name: CoolReaderFork build ${{ github.run_number }}
           body: |
             ${{ github.event.head_commit.message }}
 
-            Скачать: CoolReaderPlus.apk ниже.
-          files: out/CoolReaderPlus.apk
+            Скачать: CoolReaderFork.apk ниже.
+          files: out/CoolReaderFork.apk
           make_latest: true

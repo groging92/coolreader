@@ -7,7 +7,8 @@ android {
     defaultConfig {
         // fork: own package id, installs next to the original Cool Reader
         applicationId "org.coolreader.fork"
-        minSdkVersion 4
+        // fork: 21+ (signing key is ECDSA, needs 18+; the fork targets modern phones)
+        minSdkVersion 21
         targetSdkVersion 35
         // When new version released, version code must be incremented at least by 8
         // for compatibility with ABI versioning of split apk (see below).
