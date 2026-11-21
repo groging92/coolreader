@@ -32,6 +32,7 @@ import android.util.Log;
 import org.coolreader.crengine.BookInfo;
 import org.coolreader.crengine.Bookmark;
 import org.coolreader.crengine.DeviceInfo;
+import org.coolreader.crengine.ForkMigration;
 import org.coolreader.crengine.Engine;
 import org.coolreader.crengine.FileInfo;
 import org.coolreader.crengine.L;
@@ -85,7 +86,8 @@ public class CRDBService extends BaseService {
     private File getDatabaseDir() {
     	//File storage = Environment.getExternalStorageDirectory();
     	File storage = DeviceInfo.EINK_NOOK ? new File("/media/") : Environment.getExternalStorageDirectory();
-    	File cr3dir = new File(storage, ".cr3");
+    	ForkMigration.migrateIfNeeded();
+    	File cr3dir = new File(storage, ForkMigration.DATA_DIR_NAME);
     	if (cr3dir.isDirectory())
     		cr3dir.mkdirs();
     	if (!cr3dir.isDirectory() || !cr3dir.canWrite()) {

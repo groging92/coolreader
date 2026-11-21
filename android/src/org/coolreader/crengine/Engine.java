@@ -175,13 +175,23 @@ public class Engine {
 		File[] roots = getStorageDirectories(writableOnly);
 		ArrayList<File> res = new ArrayList<>(roots.length);
 		for (File dir : roots) {
-			File dataDir = getSubdir(dir, ".cr3", createIfNotExists,
+			File dataDir = getSubdir(dir, ForkMigration.DATA_DIR_NAME, createIfNotExists,
 					writableOnly);
 			if (subdir != null)
 				dataDir = getSubdir(dataDir, subdir, createIfNotExists,
 						writableOnly);
 			if (dataDir != null)
 				res.add(dataDir);
+		}
+		if (!writableOnly && !createIfNotExists) {
+			// read-only lookups (fonts, css): also use resources of the original Cool Reader
+			for (File dir : roots) {
+				File dataDir = getSubdir(dir, ForkMigration.LEGACY_DATA_DIR_NAME, false, false);
+				if (subdir != null)
+					dataDir = getSubdir(dataDir, subdir, false, false);
+				if (dataDir != null)
+					res.add(dataDir);
+			}
 		}
 		return res.toArray(new File[]{});
 	}
@@ -1135,7 +1145,7 @@ public class Engine {
 
 	private static String CR3_SETTINGS_DIR_NAME;
 
-	public final static String CACHE_BASE_DIR_NAME = ".cr3"; // "Books"
+	public final static String CACHE_BASE_DIR_NAME = ForkMigration.DATA_DIR_NAME; // own folder, not shared with the original Cool Reader
 
 	private static void initCacheDirectory() {
 		String cacheDirName = null;

@@ -2067,6 +2067,7 @@ public class BaseActivity extends Activity implements Settings {
 		private static boolean DEBUG_RESET_OPTIONS = false;
 
 		private Properties loadSettings() {
+			ForkMigration.migrateIfNeeded();
 			File[] dataDirs = Engine.getDataDirectories(null, false, true);
 			File existingFile = null;
 			for (File dir : dataDirs) {
