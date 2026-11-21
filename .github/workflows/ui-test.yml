@@ -56,6 +56,7 @@ jobs:
         if: always()
         run: |
           mkdir -p ui-out
+          echo "run ${{ github.run_number }} ${{ job.status }}" > ui-out/STATUS.txt
           cd ui-out
           git init -q
           git checkout -q -b ui-test-results
