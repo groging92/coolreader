@@ -314,10 +314,6 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 
 	private final FileBrowserSelection mSelection;
 
-	public FileInfo getCurrentDir() {
-		return currDirectory;
-	}
-
 	public void invalidateList() {
 		if (currentListAdapter != null)
 			currentListAdapter.notifyDataSetChanged();
