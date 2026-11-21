@@ -2,18 +2,30 @@
 <resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
     <string name="fork_app_name">CoolReaderFork</string>
     <string name="fb_sel_count">%d selected</string>
+    <string name="fb_sel_close">Close selection</string>
     <string name="fb_sel_all">All</string>
+    <string name="fb_sel_none">None</string>
     <string name="fb_sel_status">Status</string>
     <string name="fb_sel_move">Move</string>
     <string name="fb_sel_delete">Delete</string>
     <string name="fb_sel_status_title">Set status for %d books</string>
-    <string name="fb_sel_confirm_delete">Delete %d files?</string>
-    <string name="fb_sel_deleted">Deleted: %1$d, failed: %2$d</string>
+    <string name="fb_sel_status_done">Status changed: %d</string>
+    <string name="fb_sel_confirm_delete">Delete %d books?</string>
+    <string name="fb_sel_and_more">…and %d more\n</string>
+    <string name="fb_sel_delete_warning">Files will be deleted from the phone. This can\'t be undone.</string>
+    <string name="fb_sel_deleted">Deleted: %d</string>
+    <string name="fb_sel_deleted_failed">Deleted: %1$d, failed: %2$d</string>
     <string name="fb_sel_move_here">Move here</string>
     <string name="fb_sel_new_folder">New folder</string>
     <string name="fb_sel_folder_name">Folder name</string>
-    <string name="fb_sel_moved">Moved: %1$d, failed: %2$d</string>
+    <string name="fb_sel_create">Create</string>
+    <string name="fb_sel_storage">Phone storage</string>
+    <string name="fb_sel_up">Up</string>
+    <string name="fb_sel_no_folders">No folders here</string>
+    <string name="fb_sel_moved">Moved: %d</string>
+    <string name="fb_sel_moved_failed">Moved: %1$d, failed: %2$d</string>
     <string name="fb_sel_cannot_list">Cannot open folder</string>
+    <string name="fb_sel_cannot_create">Cannot create folder</string>
     <string name="all_files_access_request">To show books from phone storage, allow access to all files for CoolReaderFork</string>
     <string name="fork_logs_preparing">Collecting logs…</string>
 </resources>

@@ -98,6 +98,8 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 				selectedItem = item;
 
 				// long tap on a book starts multiple selection (check boxes on the left)
+				if (mSelection.isActive() && !FileBrowserSelection.isSelectable(item))
+					return true;
 				if (FileBrowserSelection.isSelectable(item)) {
 					if (mSelection.isActive())
 						mSelection.toggle(item);
@@ -167,8 +169,10 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 			FileInfo item = (FileInfo) getAdapter().getItem(position);
 			if ( item==null )
 				return false;
-			if (mSelection.isActive() && FileBrowserSelection.isSelectable(item)) {
-				mSelection.toggle(item);
+			if (mSelection.isActive()) {
+				// selection mode: tap only toggles books, other rows are inactive (dimmed)
+				if (FileBrowserSelection.isSelectable(item))
+					mSelection.toggle(item);
 				return true;
 			}
 			if ( item.isDirectory ) {
@@ -316,6 +320,22 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 	FileInfo selectedItem = null;
 
 	private final FileBrowserSelection mSelection;
+
+	/**
+	 * First visible list item which is not in the given collection (to keep scroll position after refresh).
+	 */
+	public FileInfo getFirstVisibleItem(java.util.Collection<FileInfo> exclude) {
+		if (mListView == null || currentListAdapter == null)
+			return null;
+		int first = mListView.getFirstVisiblePosition();
+		int last = mListView.getLastVisiblePosition();
+		for (int i = first; i <= last && i < currentListAdapter.getCount(); i++) {
+			Object o = currentListAdapter.getItem(i);
+			if (o instanceof FileInfo && !exclude.contains(o))
+				return (FileInfo) o;
+		}
+		return null;
+	}
 
 	public void invalidateList() {
 		if (currentListAdapter != null)
@@ -1323,7 +1343,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 				parentItem = currDirectory;
 			}
 			holder.setItem(item, parentItem);
-			mSelection.decorate(holder.check, item);
+			mSelection.decorate(view, holder.check, item);
 //			if ( DeviceInfo.FORCE_HC_THEME ) {
 //				view.setBackgroundColor(Color.WHITE);
 //			}

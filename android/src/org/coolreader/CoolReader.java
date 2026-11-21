@@ -751,6 +751,8 @@ public class CoolReader extends BaseActivity {
 		processIntent(intent);
 	}
 
+	public static final String OPEN_DIR_PARAM = "org.coolreader.fork.OPEN_DIR";
+
 	private boolean processIntent(Intent intent) {
 		log.d("intent=" + intent);
 		if (intent == null)
@@ -774,6 +776,13 @@ public class CoolReader extends BaseActivity {
 			}
 		}
 
+		// fork: open a folder in the file browser (used by automated UI tests and shortcuts)
+		if (intent.getExtras() != null && intent.getExtras().getString(OPEN_DIR_PARAM) != null) {
+			final String dir = intent.getExtras().getString(OPEN_DIR_PARAM);
+			intent.removeExtra(OPEN_DIR_PARAM);
+			BackgroundThread.instance().postGUI(() -> showBrowser(dir), 300);
+			return true;
+		}
 		if (fileToOpen == null && intent.getExtras() != null) {
 			log.d("extras=" + intent.getExtras());
 			fileToOpen = intent.getExtras().getString(OPEN_FILE_PARAM);

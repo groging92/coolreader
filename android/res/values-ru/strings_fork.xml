@@ -2,18 +2,30 @@
 <resources>
     <string name="fork_app_name">CoolReaderFork</string>
     <string name="fb_sel_count">Выбрано: %d</string>
+    <string name="fb_sel_close">Закрыть выбор</string>
     <string name="fb_sel_all">Все</string>
+    <string name="fb_sel_none">Снять все</string>
     <string name="fb_sel_status">Статус</string>
     <string name="fb_sel_move">Перенести</string>
     <string name="fb_sel_delete">Удалить</string>
     <string name="fb_sel_status_title">Статус для книг: %d</string>
-    <string name="fb_sel_confirm_delete">Удалить файлов: %d?</string>
-    <string name="fb_sel_deleted">Удалено: %1$d, не удалось: %2$d</string>
-    <string name="fb_sel_move_here">Сюда</string>
+    <string name="fb_sel_status_done">Статус изменён: %d</string>
+    <string name="fb_sel_confirm_delete">Удалить книги (%d)?</string>
+    <string name="fb_sel_and_more">…и ещё %d\n</string>
+    <string name="fb_sel_delete_warning">Файлы будут удалены с телефона. Отменить нельзя.</string>
+    <string name="fb_sel_deleted">Удалено: %d</string>
+    <string name="fb_sel_deleted_failed">Удалено: %1$d, не удалось: %2$d</string>
+    <string name="fb_sel_move_here">Переместить сюда</string>
     <string name="fb_sel_new_folder">Новая папка</string>
     <string name="fb_sel_folder_name">Имя папки</string>
-    <string name="fb_sel_moved">Перенесено: %1$d, не удалось: %2$d</string>
+    <string name="fb_sel_create">Создать</string>
+    <string name="fb_sel_storage">Память телефона</string>
+    <string name="fb_sel_up">Наверх</string>
+    <string name="fb_sel_no_folders">Здесь нет папок</string>
+    <string name="fb_sel_moved">Перенесено: %d</string>
+    <string name="fb_sel_moved_failed">Перенесено: %1$d, не удалось: %2$d</string>
     <string name="fb_sel_cannot_list">Не удалось открыть папку</string>
+    <string name="fb_sel_cannot_create">Не удалось создать папку</string>
     <string name="all_files_access_request">Чтобы видеть книги в памяти телефона, разреши CoolReaderFork доступ ко всем файлам</string>
     <string name="fork_logs_preparing">Собираю логи…</string>
 </resources>

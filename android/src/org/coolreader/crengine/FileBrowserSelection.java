@@ -60,6 +60,11 @@ public class FileBrowserSelection {
 	private boolean mActive;
 	private LinearLayout mBar;
 	private TextView mCountView;
+	private TextView mAllButton;
+	private final ArrayList<TextView> mItemActions = new ArrayList<>();
+
+	private static final String PREFS = "fork";
+	private static final String PREF_LAST_MOVE_DIR = "lastMoveDir";
 
 	public FileBrowserSelection(CoolReader activity, FileBrowser browser) {
 		mActivity = activity;
@@ -156,7 +161,9 @@ public class FileBrowserSelection {
 	/**
 	 * Show check box state of the item in selection mode.
 	 */
-	public void decorate(android.widget.CheckBox check, FileInfo item) {
+	public void decorate(View row, android.widget.CheckBox check, FileInfo item) {
+		if (row != null)
+			row.setAlpha(mActive && !isSelectable(item) ? 0.4f : 1.0f);
 		if (check == null)
 			return;
 		if (mActive && isSelectable(item)) {
@@ -167,11 +174,32 @@ public class FileBrowserSelection {
 		}
 	}
 
+	private boolean allSelectedInCurrentDir() {
+		FileInfo dir = mBrowser.getCurrentDir();
+		if (dir == null)
+			return false;
+		int selectable = 0;
+		for (int i = 0; i < dir.fileCount(); i++) {
+			FileInfo f = dir.getFile(i);
+			if (isSelectable(f)) {
+				selectable++;
+				if (!isSelected(f))
+					return false;
+			}
+		}
+		return selectable > 0;
+	}
+
 	private void update() {
 		if (mBar != null) {
 			mBar.setVisibility(mActive ? View.VISIBLE : View.GONE);
-			if (mCountView != null)
-				mCountView.setText(mActivity.getString(R.string.fb_sel_count, mSelected.size()));
+			mCountView.setText(mActivity.getString(R.string.fb_sel_count, mSelected.size()));
+			boolean any = !mSelected.isEmpty();
+			for (TextView b : mItemActions) {
+				b.setEnabled(any);
+				b.setAlpha(any ? 1.0f : 0.4f);
+			}
+			mAllButton.setText(allSelectedInCurrentDir() ? R.string.fb_sel_none : R.string.fb_sel_all);
 		}
 		mBrowser.invalidateList();
 	}
@@ -211,7 +239,9 @@ public class FileBrowserSelection {
 		mBar.setBackgroundColor(0xF0303030);
 		mBar.setPadding(dp(2), 0, dp(2), 0);
 
-		mBar.addView(makeButton("✕", v -> finish()),
+		TextView close = makeButton("✕", v -> finish());
+		close.setContentDescription(mActivity.getString(R.string.fb_sel_close));
+		mBar.addView(close,
 				new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 		mCountView = new TextView(mActivity);
 		mCountView.setTextColor(Color.WHITE);
@@ -221,10 +251,14 @@ public class FileBrowserSelection {
 
 		LinearLayout buttons = new LinearLayout(mActivity);
 		buttons.setOrientation(LinearLayout.HORIZONTAL);
-		buttons.addView(makeButton(mActivity.getString(R.string.fb_sel_all), v -> toggleAll()));
-		buttons.addView(makeButton(mActivity.getString(R.string.fb_sel_move), v -> askMove()));
-		buttons.addView(makeButton(mActivity.getString(R.string.fb_sel_delete), v -> askDelete()));
-		buttons.addView(makeButton(mActivity.getString(R.string.fb_sel_status), v -> askStatus()));
+		mAllButton = makeButton(mActivity.getString(R.string.fb_sel_all), v -> toggleAll());
+		buttons.addView(mAllButton);
+		mItemActions.clear();
+		mItemActions.add(makeButton(mActivity.getString(R.string.fb_sel_move), v -> askMove()));
+		mItemActions.add(makeButton(mActivity.getString(R.string.fb_sel_delete), v -> askDelete()));
+		mItemActions.add(makeButton(mActivity.getString(R.string.fb_sel_status), v -> askStatus()));
+		for (TextView b : mItemActions)
+			buttons.addView(b);
 		HorizontalScrollView scroll = new HorizontalScrollView(mActivity);
 		scroll.setHorizontalScrollBarEnabled(false);
 		scroll.addView(buttons);
@@ -238,14 +272,16 @@ public class FileBrowserSelection {
 		return new ArrayList<>(mSelected.values());
 	}
 
-	private void refreshCurrentDir() {
+	private void refreshCurrentDir(Collection<FileInfo> changed) {
 		FileInfo dir = mBrowser.getCurrentDir();
 		if (dir == null)
 			return;
+		// keep list position: scroll back to the first visible item that is still there
+		FileInfo anchor = mBrowser.getFirstVisibleItem(changed);
 		if (dir.isSpecialDir() && !dir.isOPDSRoot() && !dir.isOPDSDir())
-			mBrowser.showDirectory(dir, null); // reload virtual folder (recent, by state etc.) from DB
+			mBrowser.showDirectory(dir, anchor); // reload virtual folder (recent, by state etc.) from DB
 		else
-			mActivity.directoryUpdated(dir);
+			mActivity.directoryUpdated(dir, anchor);
 	}
 
 	//=====================================================================
@@ -279,8 +315,9 @@ public class FileBrowserSelection {
 					inTree.setReadingState(state);
 			}
 			Services.getHistory().onReadingStateChanged(items, state);
+			mActivity.showToast(mActivity.getString(R.string.fb_sel_status_done, items.size()));
 			finish();
-			refreshCurrentDir();
+			refreshCurrentDir(items);
 		}));
 	}
 
@@ -292,7 +329,34 @@ public class FileBrowserSelection {
 		final ArrayList<FileInfo> items = selectedItems();
 		if (items.isEmpty())
 			return;
-		mActivity.askConfirmation(mActivity.getString(R.string.fb_sel_confirm_delete, items.size()), () -> {
+		StringBuilder names = new StringBuilder();
+		int shown = 0;
+		for (FileInfo item : items) {
+			if (shown == 5) {
+				names.append(mActivity.getString(R.string.fb_sel_and_more, items.size() - shown));
+				break;
+			}
+			names.append("\u2022 ").append(displayName(item)).append('\n');
+			shown++;
+		}
+		names.append('\n').append(mActivity.getString(R.string.fb_sel_delete_warning));
+		new AlertDialog.Builder(mActivity)
+				.setTitle(mActivity.getString(R.string.fb_sel_confirm_delete, items.size()))
+				.setMessage(names.toString())
+				.setPositiveButton(R.string.fb_sel_delete, (d, w) -> doDelete(items))
+				.setNegativeButton(R.string.dlg_button_cancel, null)
+				.show();
+	}
+
+	private String displayName(FileInfo item) {
+		String title = item.title;
+		if (title != null && !title.trim().isEmpty())
+			return title.trim();
+		return item.filename != null ? item.filename : item.getPathName();
+	}
+
+	private void doDelete(final ArrayList<FileInfo> items) {
+		{
 			int ok = 0;
 			int failed = 0;
 			final ArrayList<FileInfo> deleted = new ArrayList<>();
@@ -313,10 +377,11 @@ public class FileBrowserSelection {
 				for (FileInfo file : deleted)
 					Services.getHistory().removeBookInfo(mActivity.getDB(), file, true, true);
 			});
-			mActivity.showToast(mActivity.getString(R.string.fb_sel_deleted, ok, failed));
+			mActivity.showToast(failed == 0 ? mActivity.getString(R.string.fb_sel_deleted, ok)
+					: mActivity.getString(R.string.fb_sel_deleted_failed, ok, failed));
 			finish();
-			refreshCurrentDir();
-		});
+			refreshCurrentDir(items);
+		}
 	}
 
 	//=====================================================================
@@ -324,6 +389,9 @@ public class FileBrowserSelection {
 	//=====================================================================
 
 	private File startFolderForMove(Collection<FileInfo> items) {
+		String last = mActivity.getSharedPreferences(PREFS, 0).getString(PREF_LAST_MOVE_DIR, null);
+		if (last != null && new File(last).isDirectory())
+			return new File(last);
 		FileInfo dir = mBrowser.getCurrentDir();
 		if (dir != null && !dir.isSpecialDir() && !dir.isArchive && dir.getPathName() != null) {
 			File f = new File(dir.getPathName());
@@ -342,7 +410,21 @@ public class FileBrowserSelection {
 		final ArrayList<FileInfo> items = selectedItems();
 		if (items.isEmpty())
 			return;
-		new FolderPicker(startFolderForMove(items), destDir -> moveTo(items, destDir)).show();
+		new FolderPicker(startFolderForMove(items), sourceFolders(items), destDir -> {
+			mActivity.getSharedPreferences(PREFS, 0).edit().putString(PREF_LAST_MOVE_DIR, destDir.getAbsolutePath()).apply();
+			moveTo(items, destDir);
+		}).show();
+	}
+
+	/** Folders the selected files are in: moving there is a no-op. */
+	private java.util.HashSet<String> sourceFolders(Collection<FileInfo> items) {
+		java.util.HashSet<String> res = new java.util.HashSet<>();
+		for (FileInfo item : items) {
+			File parent = new File(item.getBasePath()).getParentFile();
+			if (parent != null)
+				res.add(parent.getAbsolutePath());
+		}
+		return res;
 	}
 
 	private static boolean copyFile(File src, File dst) {
@@ -433,9 +515,10 @@ public class FileBrowserSelection {
 			FileInfo destNode = Services.getScanner().findFileInTree(new FileInfo(destDir));
 			if (destNode != null)
 				destNode.isScanned = false;
-			mActivity.showToast(mActivity.getString(R.string.fb_sel_moved, moved.size(), failed));
+			mActivity.showToast(failed == 0 ? mActivity.getString(R.string.fb_sel_moved, moved.size())
+					: mActivity.getString(R.string.fb_sel_moved_failed, moved.size(), failed));
 			finish();
-			refreshCurrentDir();
+			refreshCurrentDir(moved.keySet());
 		});
 	}
 
@@ -448,14 +531,36 @@ public class FileBrowserSelection {
 	 */
 	private class FolderPicker {
 		private File mCurrent;
+		private final File mRoot = android.os.Environment.getExternalStorageDirectory();
+		private final java.util.Set<String> mSourceFolders;
 		private final FolderSelectedCallback mCallback;
 		private final ArrayList<File> mEntries = new ArrayList<>();
 		private ArrayAdapter<String> mAdapter;
 		private AlertDialog mDialog;
 
-		FolderPicker(File start, FolderSelectedCallback callback) {
+		FolderPicker(File start, java.util.Set<String> sourceFolders, FolderSelectedCallback callback) {
 			mCurrent = start;
+			mSourceFolders = sourceFolders;
 			mCallback = callback;
+		}
+
+		/** Path for humans: "Phone/Books/Fantasy" instead of /storage/emulated/0/Books/Fantasy. */
+		private String displayPath(File dir) {
+			String root = mRoot.getAbsolutePath();
+			String path = dir.getAbsolutePath();
+			if (path.equals(root))
+				return mActivity.getString(R.string.fb_sel_storage);
+			if (path.startsWith(root + "/"))
+				return mActivity.getString(R.string.fb_sel_storage) + path.substring(root.length());
+			return path;
+		}
+
+		private boolean canGoUp() {
+			File parent = mCurrent.getParentFile();
+			if (parent == null || parent.listFiles() == null)
+				return false;
+			// don't leave the phone storage into system folders
+			return !mCurrent.getAbsolutePath().equals(mRoot.getAbsolutePath());
 		}
 
 		void show() {
@@ -466,6 +571,8 @@ public class FileBrowserSelection {
 				if (position < 0 || position >= mEntries.size())
 					return;
 				File f = mEntries.get(position);
+				if (f == null)
+					return; // "no folders" hint
 				if (f.listFiles() == null) {
 					mActivity.showToast(R.string.fb_sel_cannot_list);
 					return;
@@ -474,59 +581,94 @@ public class FileBrowserSelection {
 				refresh();
 			});
 			mDialog = new AlertDialog.Builder(mActivity)
-					.setTitle(mCurrent.getAbsolutePath())
+					.setTitle(displayPath(mCurrent))
 					.setView(list)
 					.setPositiveButton(R.string.fb_sel_move_here, (d, w) -> mCallback.onFolderSelected(mCurrent))
 					.setNeutralButton(R.string.fb_sel_new_folder, null)
 					.setNegativeButton(R.string.dlg_button_cancel, null)
 					.create();
-			mDialog.setOnShowListener(d -> mDialog.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener(v -> askNewFolder()));
+			mDialog.setOnShowListener(d -> {
+				mDialog.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener(v -> askNewFolder());
+				updateMoveButton();
+			});
 			refresh();
 			mDialog.show();
+		}
+
+		private void updateMoveButton() {
+			if (mDialog == null)
+				return;
+			android.widget.Button b = mDialog.getButton(AlertDialog.BUTTON_POSITIVE);
+			if (b != null)
+				b.setEnabled(!mSourceFolders.contains(mCurrent.getAbsolutePath()));
 		}
 
 		private void refresh() {
 			mEntries.clear();
 			mAdapter.clear();
-			File parent = mCurrent.getParentFile();
-			if (parent != null && parent.listFiles() != null) {
-				mEntries.add(parent);
-				mAdapter.add("↑ ..");
+			if (canGoUp()) {
+				mEntries.add(mCurrent.getParentFile());
+				mAdapter.add("\u2191 " + mActivity.getString(R.string.fb_sel_up));
 			}
 			File[] dirs = mCurrent.listFiles(f -> f.isDirectory() && !f.getName().startsWith("."));
-			if (dirs != null) {
+			if (dirs != null && dirs.length > 0) {
 				Arrays.sort(dirs, (a, b) -> a.getName().compareToIgnoreCase(b.getName()));
 				for (File d : dirs) {
 					mEntries.add(d);
-					mAdapter.add("📁 " + d.getName());
+					mAdapter.add("\uD83D\uDCC1 " + d.getName());
 				}
+			} else {
+				mEntries.add(null);
+				mAdapter.add(mActivity.getString(R.string.fb_sel_no_folders));
 			}
 			mAdapter.notifyDataSetChanged();
 			if (mDialog != null)
-				mDialog.setTitle(mCurrent.getAbsolutePath());
+				mDialog.setTitle(displayPath(mCurrent));
+			updateMoveButton();
 		}
 
 		private void askNewFolder() {
 			final EditText edit = new EditText(mActivity);
 			edit.setSingleLine(true);
-			new AlertDialog.Builder(mActivity)
+			edit.setHint(R.string.fb_sel_folder_name);
+			int pad = dp(20);
+			android.widget.FrameLayout box = new android.widget.FrameLayout(mActivity);
+			box.setPadding(pad, dp(8), pad, 0);
+			box.addView(edit);
+			final AlertDialog dlg = new AlertDialog.Builder(mActivity)
 					.setTitle(R.string.fb_sel_new_folder)
-					.setMessage(R.string.fb_sel_folder_name)
-					.setView(edit)
-					.setPositiveButton(R.string.dlg_button_ok, (d, w) -> {
+					.setView(box)
+					.setPositiveButton(R.string.fb_sel_create, (d, w) -> {
 						String name = edit.getText().toString().trim();
-						if (name.isEmpty() || name.contains("/"))
+						if (name.isEmpty() || name.contains("/") || name.equals(".") || name.equals(".."))
 							return;
 						File nf = new File(mCurrent, name);
 						if (nf.isDirectory() || nf.mkdirs()) {
 							mCurrent = nf;
 							refresh();
 						} else {
-							mActivity.showToast(R.string.fb_sel_cannot_list);
+							mActivity.showToast(R.string.fb_sel_cannot_create);
 						}
 					})
 					.setNegativeButton(R.string.dlg_button_cancel, null)
-					.show();
+					.create();
+			// show keyboard right away
+			if (dlg.getWindow() != null)
+				dlg.getWindow().setSoftInputMode(android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
+			dlg.setOnShowListener(d -> {
+				final android.widget.Button create = dlg.getButton(AlertDialog.BUTTON_POSITIVE);
+				create.setEnabled(false);
+				edit.addTextChangedListener(new android.text.TextWatcher() {
+					public void beforeTextChanged(CharSequence cs, int a, int b, int c) {}
+					public void onTextChanged(CharSequence cs, int a, int b, int c) {}
+					public void afterTextChanged(android.text.Editable e) {
+						String n = e.toString().trim();
+						create.setEnabled(!n.isEmpty() && !n.contains("/"));
+					}
+				});
+				edit.requestFocus();
+			});
+			dlg.show();
 		}
 	}
 }
