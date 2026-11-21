@@ -5664,29 +5664,46 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		BackgroundThread.instance().executeGUI(() -> {
 			final int mylastSavePositionTaskId = ++lastSavePositionTaskId;
 			if (isBookLoaded() && mBookInfo != null) {
-				final Bookmark bmk = getCurrentPositionBookmark();
-				if (bmk == null)
-					return;
 				final BookInfo bookInfo = mBookInfo;
 				if (delayMillis <= 1) {
-					if (bookInfo != null && mActivity.getDB() != null) {
+					final Bookmark bmk = getCurrentPositionBookmark();
+					if (bmk == null)
+						return;
+					if (mActivity.getDB() != null) {
 						log.v("saving last position immediately");
 						savePositionBookmark(bmk);
 						Services.getHistory().updateBookAccess(bookInfo, getTimeElapsed());
 					}
 				} else {
+					// Delayed save: do not take the position snapshot in the GUI thread right now.
+					// This is called after every page turn, and reading the position from the engine
+					// in GUI thread waits for the document lock while the background thread renders
+					// pages, which freezes the UI. Take the snapshot in the background thread
+					// only when the save is really due.
 					BackgroundThread.instance().postGUI(() -> {
-						if (mylastSavePositionTaskId == lastSavePositionTaskId) {
-							if (bookInfo != null) {
+						if (mylastSavePositionTaskId != lastSavePositionTaskId || bookInfo != mBookInfo || !isBookLoaded())
+							return;
+						BackgroundThread.instance().postBackground(() -> {
+							if (!mOpened)
+								return;
+							final Bookmark bmk = doc.getCurrentPageBookmarkNoRender();
+							if (bmk == null)
+								return;
+							BackgroundThread.instance().postGUI(() -> {
+								if (mylastSavePositionTaskId != lastSavePositionTaskId || bookInfo != mBookInfo || !isBookLoaded())
+									return;
+								// this delayed task can be completed after calling CoolReader.onDestroy(),
+								// which in turn calls Services.stopServices().
+								if (Services.isStopped())
+									return;
 								log.v("saving last position");
-								if (!Services.isStopped()) {
-									// this delayed task can be completed after calling CoolReader.onDestroy(),
-									// which in turn calls Services.stopServices().
-									savePositionBookmark(bmk);
-									Services.getHistory().updateBookAccess(bookInfo, getTimeElapsed());
-								}
-							}
-						}
+								bmk.setTimeStamp(System.currentTimeMillis());
+								bmk.setType(Bookmark.TYPE_LAST_POSITION);
+								bookInfo.setLastPosition(bmk);
+								savePositionBookmark(bmk);
+								Services.getHistory().updateBookAccess(bookInfo, getTimeElapsed());
+							});
+						});
 					}, delayMillis);
 				}
 			}

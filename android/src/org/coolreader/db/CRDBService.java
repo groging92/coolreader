@@ -43,6 +43,7 @@ import org.coolreader.crengine.Utils;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Map;
 
 public class CRDBService extends BaseService {
 	public static final Logger log = L.create("db");
@@ -347,6 +348,10 @@ public class CRDBService extends BaseService {
     	void onBooksFound(ArrayList<FileInfo> fileList);
     }
 
+    public interface LastPositionsLoadingCallback {
+    	void onLastPositionsLoaded(Map<String, Bookmark> positions);
+    }
+
 	public void loadGenresList(FileInfo parent, boolean showEmptyGenres, final ItemGroupsLoadingCallback callback, final Handler handler) {
 		final FileInfo p = new FileInfo(parent);
 		execTask(new Task("loadGenresList") {
@@ -455,6 +460,38 @@ public class CRDBService extends BaseService {
 		});
 	}
 	
+	public void loadLastPositions(final LastPositionsLoadingCallback callback, final Handler handler) {
+		execTask(new Task("loadLastPositions") {
+			@Override
+			public void work() {
+				final Map<String, Bookmark> positions = mainDB.loadLastPositions();
+				sendTask(handler, () -> callback.onLastPositionsLoaded(positions));
+			}
+		});
+	}
+
+	public void moveBookRecord(final FileInfo item, final String newBasePath) {
+		execTask(new Task("moveBookRecord") {
+			@Override
+			public void work() {
+				mainDB.moveBookRecord(item, newBasePath);
+				coverDB.deleteCoverpage(item.getPathName());
+			}
+		});
+		flush();
+	}
+
+	public void setReadingState(final Collection<FileInfo> items, final int state, final Runnable callback, final Handler handler) {
+		execTask(new Task("setReadingState") {
+			@Override
+			public void work() {
+				mainDB.setReadingState(items, state);
+				if (callback != null)
+					sendTask(handler, callback);
+			}
+		});
+	}
+
 	public void sync(final Runnable callback, final Handler handler) {
 		execTask(new Task("sync") {
 			@Override
@@ -695,6 +732,18 @@ public class CRDBService extends BaseService {
 
     	public void sync(final Runnable callback) {
     		getService().sync(callback, new Handler());
+    	}
+
+    	public void loadLastPositions(final LastPositionsLoadingCallback callback) {
+    		getService().loadLastPositions(callback, new Handler());
+    	}
+
+    	public void moveBookRecord(final FileInfo item, final String newBasePath) {
+    		getService().moveBookRecord(new FileInfo(item), newBasePath);
+    	}
+
+    	public void setReadingState(final Collection<FileInfo> items, final int state, final Runnable callback) {
+    		getService().setReadingState(deepCopyFileInfos(items), state, callback, new Handler());
     	}
 
     	public void saveFileInfos(final Collection<FileInfo> list) {

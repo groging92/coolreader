@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="fork_app_name">CoolReader+</string>
+    <string name="fb_sel_all">Все</string>
+    <string name="fb_sel_status">Статус</string>
+    <string name="fb_sel_move">Перенести</string>
+    <string name="fb_sel_delete">Удалить</string>
+    <string name="fb_sel_status_title">Статус для книг: %d</string>
+    <string name="fb_sel_confirm_delete">Удалить файлов: %d?</string>
+    <string name="fb_sel_deleted">Удалено: %1$d, не удалось: %2$d</string>
+    <string name="fb_sel_move_here">Сюда</string>
+    <string name="fb_sel_new_folder">Новая папка</string>
+    <string name="fb_sel_folder_name">Имя папки</string>
+    <string name="fb_sel_moved">Перенесено: %1$d, не удалось: %2$d</string>
+    <string name="fb_sel_cannot_list">Не удалось открыть папку</string>
+    <string name="all_files_access_request">Чтобы видеть книги в памяти телефона, разреши CoolReader+ доступ ко всем файлам</string>
+</resources>

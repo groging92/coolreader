@@ -953,6 +953,15 @@ public class CoolReader extends BaseActivity {
 		super.onResume();
 		//Properties props = SettingsManager.instance(this).get();
 
+		if (mAllFilesAccessRequested && Build.VERSION.SDK_INT >= Build.VERSION_CODES.R
+				&& android.os.Environment.isExternalStorageManager()) {
+			// returned from system settings with access granted
+			mAllFilesAccessRequested = false;
+			onStoragePermissionGranted();
+			if (Engine.getExternalSettingsDirName() != null)
+				setExtDataDirCreateTime(new Date());
+		}
+
 		if (mReaderView != null)
 			mReaderView.onAppResume();
 		// ACTION_BATTERY_CHANGED: This is a sticky broadcast containing the charging state, level, and other information about the battery.
@@ -1095,7 +1104,49 @@ public class CoolReader extends BaseActivity {
 		log.i("CoolReader.onStop() exiting");
 	}
 
+	// Android 11+: books are not media files, so reading them from shared storage
+	// requires "All files access" (MANAGE_EXTERNAL_STORAGE).
+	private boolean mAllFilesAccessRequested = false;
+
+	private boolean requestAllFilesAccess() {
+		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R)
+			return false;
+		if (android.os.Environment.isExternalStorageManager()) {
+			log.i("All files access already granted.");
+			return true;
+		}
+		mAllFilesAccessRequested = true;
+		showToast(R.string.all_files_access_request);
+		try {
+			Intent intent = new Intent(android.provider.Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION,
+					Uri.parse("package:" + getPackageName()));
+			startActivity(intent);
+		} catch (Exception e) {
+			try {
+				startActivity(new Intent(android.provider.Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION));
+			} catch (Exception e2) {
+				log.e("Cannot request all files access", e2);
+			}
+		}
+		return true;
+	}
+
+	private void onStoragePermissionGranted() {
+		log.i("storage permission GRANTED, adding sd card mount point...");
+		Services.refreshServices(this);
+		rebaseSettings();
+		waitForCRDBService(() -> {
+			getDBService().setPathCorrector(Engine.getInstance(CoolReader.this).getPathCorrector());
+			getDB().reopenDatabase();
+			Services.getHistory().loadFromDB(getDB(), 200);
+		});
+		if (mHomeFrame != null)
+			mHomeFrame.refreshView();
+	}
+
 	private void requestStoragePermissions() {
+		if (requestAllFilesAccess())
+			return;
 		// check or request permission for storage
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 			int readExtStoragePermissionCheck = checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE);

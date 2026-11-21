@@ -5,13 +5,16 @@ android {
     compileSdkVersion 35
     buildToolsVersion "35.0.0"
     defaultConfig {
-        applicationId "org.coolreader"
+        // fork: own package id, installs next to the original Cool Reader
+        applicationId "org.coolreader.fork"
         minSdkVersion 4
         targetSdkVersion 35
         // When new version released, version code must be incremented at least by 8
         // for compatibility with ABI versioning of split apk (see below).
-        versionCode 32570
-        versionName "3.2.59-1"
+        // fork: CI passes FORK_BUILD (run number) so every build is an upgrade of the previous one
+        def forkBuild = System.getenv("FORK_BUILD")
+        versionCode forkBuild != null ? 32570 + 8 * Integer.parseInt(forkBuild) : 32570
+        versionName forkBuild != null ? "3.2.59-fork." + forkBuild : "3.2.59-1"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         externalNativeBuild {
             cmake {
@@ -28,8 +31,22 @@ android {
             res.srcDirs = ['../../android/res']
         }
     }
+    signingConfigs {
+        fork {
+            // CI passes the keystore via environment; see .github/workflows/android.yml
+            def ks = System.getenv("FORK_KEYSTORE_FILE")
+            if (ks != null && file(ks).exists()) {
+                storeFile file(ks)
+                storePassword System.getenv("FORK_KEYSTORE_PASSWORD")
+                keyAlias System.getenv("FORK_KEY_ALIAS") ?: "fork"
+                keyPassword System.getenv("FORK_KEYSTORE_PASSWORD")
+            }
+        }
+    }
     buildTypes {
         release {
+            if (System.getenv("FORK_KEYSTORE_FILE") != null)
+                signingConfig signingConfigs.fork
             // to make the bug report more readable.
             minifyEnabled false
             shrinkResources false
@@ -79,8 +96,15 @@ android {
         abi {
             enable true
             reset()
-            include 'x86', 'x86_64', 'armeabi-v7a', 'arm64-v8a' //select ABIs to build APKs for
-            universalApk true //generate an additional APK that contains all the ABIs
+            // FORK_ABIS env (comma separated) limits ABIs to speed up CI builds
+            def forkAbis = System.getenv("FORK_ABIS")
+            if (forkAbis != null && !forkAbis.isEmpty()) {
+                include(*forkAbis.split(","))
+                universalApk false
+            } else {
+                include 'x86', 'x86_64', 'armeabi-v7a', 'arm64-v8a' //select ABIs to build APKs for
+                universalApk true //generate an additional APK that contains all the ABIs
+            }
         }
     }
      // map for the version code

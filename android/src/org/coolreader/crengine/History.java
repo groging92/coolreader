@@ -22,6 +22,8 @@
 package org.coolreader.crengine;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.coolreader.db.CRDBService;
 
@@ -30,6 +32,8 @@ import android.util.Log;
 public class History extends FileInfoChangeSource {
 	private ArrayList<BookInfo> mBooks = new ArrayList<>();
 	private FileInfo mRecentBooksFolder;
+	// last positions of all books in DB (not only recent ones), by path name
+	private Map<String, Bookmark> mLastPositions = new HashMap<>();
 
 	public History(Scanner scanner)
 	{
@@ -94,6 +98,7 @@ public class History extends FileInfoChangeSource {
 		int index = findBookInfo(fileInfo);
 		if (index >= 0)
 			mBooks.remove(index);
+		mLastPositions.remove(fileInfo.getPathName());
 		if ( removeBookFromDB )
 			db.deleteBook(fileInfo);
 		else if ( removeRecentAccessFromDB )
@@ -157,8 +162,44 @@ public class History extends FileInfoChangeSource {
 	{
 		int index = findBookInfo(file);
 		if ( index<0 )
-			return null;
+			return mLastPositions.get(file.getPathName());
 		return mBooks.get(index).getLastPosition();
+	}
+
+	/**
+	 * Book file was moved: update in-memory history entries.
+	 */
+	public void onBookMoved(String oldPathName, FileInfo newFile)
+	{
+		Bookmark pos = mLastPositions.remove(oldPathName);
+		if (pos != null)
+			mLastPositions.put(newFile.getPathName(), pos);
+		int index = findBookInfo(oldPathName);
+		if (index >= 0) {
+			FileInfo fi = mBooks.get(index).getFileInfo();
+			fi.pathname = newFile.pathname;
+			fi.path = newFile.path;
+			fi.filename = newFile.filename;
+			fi.arcname = newFile.arcname;
+			updateRecentDir();
+		}
+	}
+
+	/**
+	 * Reading state changed in DB for these books: update in-memory history entries.
+	 */
+	public void onReadingStateChanged(java.util.Collection<FileInfo> files, int state)
+	{
+		boolean changed = false;
+		for (FileInfo f : files) {
+			int index = findBookInfo(f);
+			if (index >= 0) {
+				mBooks.get(index).getFileInfo().setReadingState(state);
+				changed = true;
+			}
+		}
+		if (changed)
+			updateRecentDir();
 	}
 	protected void updateRecentDir()
 	{
@@ -188,6 +229,10 @@ public class History extends FileInfoChangeSource {
 	{
 		Log.v("cr3", "History.loadFromDB()");
 		mRecentBooksFolder = mScanner.getRecentDir();
+		db.loadLastPositions(positions -> {
+			if (positions != null)
+				mLastPositions = positions;
+		});
 		db.loadRecentBooks(100, bookList -> {
 			if (bookList != null) {
 				mBooks = bookList;

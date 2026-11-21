@@ -97,6 +97,12 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 				//mActivity.loadDocument(item);
 				selectedItem = item;
 
+				// long tap on a book starts multiple selection; in selection mode it opens book info
+				if (!mSelection.isActive() && FileBrowserSelection.isSelectable(item)) {
+					mSelection.start(item);
+					return true;
+				}
+
 				boolean bookInfoDialogEnabled = true; // TODO: it's for debug
 				if (!item.isDirectory && !item.isOPDSBook() && bookInfoDialogEnabled && !item.isOnlineCatalogPluginDir()) {
 					mActivity.editBookInfo(currDirectory, item);
@@ -158,6 +164,10 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 			FileInfo item = (FileInfo) getAdapter().getItem(position);
 			if ( item==null )
 				return false;
+			if (mSelection.isActive() && FileBrowserSelection.isSelectable(item)) {
+				mSelection.toggle(item);
+				return true;
+			}
 			if ( item.isDirectory ) {
 				showDirectory(item, null);
 				return true;
@@ -215,6 +225,8 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 		this.mHistory = history;
 		this.mCoverpageManager = Services.getCoverpageManager();
 		this.mHideEmptyGenres = hideEmptyGenres;
+		this.mSelection = new FileBrowserSelection(activity, this);
+		setOrientation(VERTICAL);
 
 		coverpageListener = files -> {
 			if (currDirectory == null)
@@ -282,10 +294,12 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 		} else {
 			currentListAdapter.notifyDataSetChanged();
 		}
-		mListView.setLayoutParams(new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
+		mListView.setLayoutParams(new LayoutParams(LayoutParams.FILL_PARENT, 0, 1.0f));
 		mListView.setCacheColorHint(0);
 		//mListView.setBackgroundResource(R.drawable.background_tiled_light);
 		removeAllViews();
+		// multiple selection action bar above the list
+		addView(mSelection.getBar(), new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT));
 		addView(mListView);
 		mListView.setVisibility(VISIBLE);
 		progress = new ProgressPopup(mActivity, mListView);
@@ -297,7 +311,18 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 	}
 	
 	FileInfo selectedItem = null;
-	
+
+	private final FileBrowserSelection mSelection;
+
+	public FileInfo getCurrentDir() {
+		return currDirectory;
+	}
+
+	public void invalidateList() {
+		if (currentListAdapter != null)
+			currentListAdapter.notifyDataSetChanged();
+	}
+
 	public boolean onContextItemSelected(MenuItem item) {
 		
 		if ( selectedItem==null )
@@ -401,6 +426,11 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 
 	public void showParentDirectory()
 	{
+		if (mSelection.isActive()) {
+			// BACK in selection mode just leaves it
+			mSelection.finish();
+			return;
+		}
 		if (currDirectory == null || currDirectory.parent == null || currDirectory.parent.isRootDir()) {
 			mScanControl.stop();
 			mActivity.showRootWindow();
@@ -1291,6 +1321,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 				parentItem = currDirectory;
 			}
 			holder.setItem(item, parentItem);
+			mSelection.decorate(view, item);
 //			if ( DeviceInfo.FORCE_HC_THEME ) {
 //				view.setBackgroundColor(Color.WHITE);
 //			}

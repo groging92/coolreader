@@ -45,6 +45,7 @@ import org.coolreader.crengine.Services;
 import org.coolreader.crengine.Utils;
 import org.coolreader.genrescollection.GenresCollection;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -1943,6 +1944,110 @@ public class MainDB extends BaseDB {
 			log.e("Exception while loading books from DB", e);
 		}
 		return list;
+	}
+
+	/**
+	 * Last reading position (percent, timestamp, elapsed time) for every book in DB,
+	 * keyed by FileInfo.getPathName(). Used to show progress for books that are not
+	 * in the in-memory recent list (which keeps only the latest 100 books).
+	 */
+	public Map<String, Bookmark> loadLastPositions() {
+		HashMap<String, Bookmark> map = new HashMap<>();
+		if (!isOpened())
+			return map;
+		String sql = "SELECT b.pathname, bm.percent, bm.time_stamp, bm.time_elapsed " +
+				"FROM book b INNER JOIN bookmark bm ON bm.book_fk=b.id " +
+				"WHERE bm.type=" + Bookmark.TYPE_LAST_POSITION;
+		try {
+			beginReading();
+			try (Cursor rs = mDB.rawQuery(sql, null)) {
+				if (rs.moveToFirst()) {
+					do {
+						String pathname = rs.getString(0);
+						if (pathname == null)
+							continue;
+						Bookmark bm = new Bookmark();
+						bm.setType(Bookmark.TYPE_LAST_POSITION);
+						bm.setPercent(rs.getInt(1));
+						bm.setTimeStamp(rs.getLong(2));
+						bm.setTimeElapsed(rs.getLong(3));
+						map.put(pathname, bm);
+					} while (rs.moveToNext());
+				}
+			}
+			endReading();
+		} catch (Exception e) {
+			log.e("Exception while loading last positions", e);
+		}
+		return map;
+	}
+
+	/**
+	 * Update DB record of a book whose file (or containing archive) was moved to newBasePath,
+	 * keeping its id, so reading position, bookmarks and status are preserved.
+	 * @return path name of the book after move
+	 */
+	public String moveBookRecord(FileInfo item, String newBasePath) {
+		FileInfo moved = new FileInfo(item);
+		if (moved.arcname != null) {
+			moved.arcname = newBasePath;
+		} else {
+			File f = new File(newBasePath);
+			moved.pathname = f.getAbsolutePath();
+			moved.path = f.getParent();
+			moved.filename = f.getName();
+		}
+		if (!isOpened())
+			return moved.getPathName();
+		try {
+			FileInfo old = findFileInfoByPathname(item.getPathName(), false);
+			if (old != null && old.id != null) {
+				FileInfo newValue = new FileInfo(old);
+				newValue.pathname = moved.pathname;
+				newValue.path = moved.path;
+				newValue.filename = moved.filename;
+				newValue.arcname = moved.arcname;
+				fileInfoCache.remove(old);
+				beginChanges();
+				QueryHelper h = new QueryHelper(newValue, old);
+				h.update(old.id);
+				fileInfoCache.put(newValue);
+			}
+		} catch (Exception e) {
+			log.e("Exception while moving book record " + item.getPathName(), e);
+		}
+		return moved.getPathName();
+	}
+
+	/**
+	 * Set reading state for several books at once. Only the state bits of the stored
+	 * record are changed, other fields (last access time etc.) are left as in DB.
+	 */
+	public void setReadingState(Collection<FileInfo> items, int state) {
+		if (!isOpened())
+			return;
+		try {
+			for (FileInfo item : items) {
+				FileInfo old = findFileInfoByPathname(item.getPathName(), true);
+				if (old != null && old.id != null) {
+					FileInfo newValue = new FileInfo(old);
+					if (!newValue.setReadingState(state))
+						continue;
+					beginChanges();
+					QueryHelper h = new QueryHelper(newValue, old);
+					h.update(old.id);
+					fileInfoCache.put(newValue);
+				} else {
+					FileInfo newValue = new FileInfo(item);
+					newValue.id = null;
+					newValue.setReadingState(state);
+					save(newValue);
+				}
+			}
+			flush();
+		} catch (Exception e) {
+			log.e("Exception while setting reading state", e);
+		}
 	}
 
 	public void deleteRecentPosition( FileInfo fileInfo ) {
