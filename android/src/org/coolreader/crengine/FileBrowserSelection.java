@@ -59,6 +59,7 @@ public class FileBrowserSelection {
 	private final LinkedHashMap<String, FileInfo> mSelected = new LinkedHashMap<>();
 	private boolean mActive;
 	private LinearLayout mBar;
+	private LinearLayout mBottomBar;
 	private TextView mCountView;
 	private TextView mAllButton;
 	private final ArrayList<TextView> mItemActions = new ArrayList<>();
@@ -161,9 +162,18 @@ public class FileBrowserSelection {
 	/**
 	 * Show check box state of the item in selection mode.
 	 */
-	public void decorate(View row, android.widget.CheckBox check, FileInfo item) {
-		if (row != null)
+	private static final int SELECTED_ROW_COLOR = 0x332196F3;
+
+	public void decorate(View row, android.widget.CheckBox check, View infoButton, FileInfo item) {
+		if (row != null) {
 			row.setAlpha(mActive && !isSelectable(item) ? 0.4f : 1.0f);
+			if (mActive && isSelected(item))
+				row.setBackgroundColor(SELECTED_ROW_COLOR);
+			else
+				row.setBackground(null);
+		}
+		if (infoButton != null)
+			infoButton.setVisibility(mActive ? View.INVISIBLE : View.VISIBLE);
 		if (check == null)
 			return;
 		if (mActive && isSelectable(item)) {
@@ -193,6 +203,7 @@ public class FileBrowserSelection {
 	private void update() {
 		if (mBar != null) {
 			mBar.setVisibility(mActive ? View.VISIBLE : View.GONE);
+			mBottomBar.setVisibility(mActive ? View.VISIBLE : View.GONE);
 			mCountView.setText(mActivity.getString(R.string.fb_sel_count, mSelected.size()));
 			boolean any = !mSelected.isEmpty();
 			for (TextView b : mItemActions) {
@@ -227,45 +238,69 @@ public class FileBrowserSelection {
 		return b;
 	}
 
+	/**
+	 * Top contextual bar: close, count, select all/none.
+	 */
 	public View getBar() {
-		if (mBar != null) {
-			if (mBar.getParent() instanceof ViewGroup)
-				((ViewGroup) mBar.getParent()).removeView(mBar);
-			return mBar;
-		}
+		if (mBar == null)
+			createBars();
+		detach(mBar);
+		return mBar;
+	}
+
+	/**
+	 * Bottom action bar (within thumb reach on tall phones): move, delete, status.
+	 */
+	public View getBottomBar() {
+		if (mBottomBar == null)
+			createBars();
+		detach(mBottomBar);
+		return mBottomBar;
+	}
+
+	private static void detach(View v) {
+		if (v.getParent() instanceof ViewGroup)
+			((ViewGroup) v.getParent()).removeView(v);
+	}
+
+	private void createBars() {
 		mBar = new LinearLayout(mActivity);
 		mBar.setOrientation(LinearLayout.HORIZONTAL);
 		mBar.setGravity(Gravity.CENTER_VERTICAL);
 		mBar.setBackgroundColor(0xF0303030);
-		mBar.setPadding(dp(2), 0, dp(2), 0);
+		mBar.setMinimumHeight(dp(56));
+		mBar.setPadding(dp(4), 0, dp(4), 0);
 
-		TextView close = makeButton("✕", v -> finish());
+		TextView close = makeButton("\u2715", v -> finish());
+		close.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
+		close.setMinWidth(dp(48));
 		close.setContentDescription(mActivity.getString(R.string.fb_sel_close));
-		mBar.addView(close,
-				new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+		mBar.addView(close, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.MATCH_PARENT));
 		mCountView = new TextView(mActivity);
 		mCountView.setTextColor(Color.WHITE);
-		mCountView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
-		mCountView.setPadding(dp(4), 0, dp(4), 0);
+		mCountView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
+		mCountView.setSingleLine(true);
+		mCountView.setEllipsize(android.text.TextUtils.TruncateAt.END);
+		mCountView.setPadding(dp(8), 0, dp(8), 0);
 		mBar.addView(mCountView, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-
-		LinearLayout buttons = new LinearLayout(mActivity);
-		buttons.setOrientation(LinearLayout.HORIZONTAL);
 		mAllButton = makeButton(mActivity.getString(R.string.fb_sel_all), v -> toggleAll());
-		buttons.addView(mAllButton);
+		mBar.addView(mAllButton, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.MATCH_PARENT));
+		mBar.setVisibility(mActive ? View.VISIBLE : View.GONE);
+
+		mBottomBar = new LinearLayout(mActivity);
+		mBottomBar.setOrientation(LinearLayout.HORIZONTAL);
+		mBottomBar.setBackgroundColor(0xF0303030);
 		mItemActions.clear();
 		mItemActions.add(makeButton(mActivity.getString(R.string.fb_sel_move), v -> askMove()));
-		mItemActions.add(makeButton(mActivity.getString(R.string.fb_sel_delete), v -> askDelete()));
+		TextView delete = makeButton(mActivity.getString(R.string.fb_sel_delete), v -> askDelete());
+		delete.setTextColor(0xFFFF8A80); // destructive action
+		mItemActions.add(delete);
 		mItemActions.add(makeButton(mActivity.getString(R.string.fb_sel_status), v -> askStatus()));
-		for (TextView b : mItemActions)
-			buttons.addView(b);
-		HorizontalScrollView scroll = new HorizontalScrollView(mActivity);
-		scroll.setHorizontalScrollBarEnabled(false);
-		scroll.addView(buttons);
-		mBar.addView(scroll, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-
-		mBar.setVisibility(mActive ? View.VISIBLE : View.GONE);
-		return mBar;
+		for (TextView b : mItemActions) {
+			b.setMinHeight(dp(56));
+			mBottomBar.addView(b, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+		}
+		mBottomBar.setVisibility(mActive ? View.VISIBLE : View.GONE);
 	}
 
 	private ArrayList<FileInfo> selectedItems() {
@@ -529,6 +564,17 @@ public class FileBrowserSelection {
 	/**
 	 * Simple folder chooser: navigate folders, create a new one, pick the current one.
 	 */
+	private static final File NEW_FOLDER = new File("/.cr3fork-new-folder-row");
+
+	/** /sdcard/... and /storage/emulated/0/... are the same folder: compare canonical paths. */
+	private static File canonical(File f) {
+		try {
+			return f.getCanonicalFile();
+		} catch (Exception e) {
+			return f.getAbsoluteFile();
+		}
+	}
+
 	private class FolderPicker {
 		private File mCurrent;
 		private final File mRoot = android.os.Environment.getExternalStorageDirectory();
@@ -539,14 +585,16 @@ public class FileBrowserSelection {
 		private AlertDialog mDialog;
 
 		FolderPicker(File start, java.util.Set<String> sourceFolders, FolderSelectedCallback callback) {
-			mCurrent = start;
-			mSourceFolders = sourceFolders;
+			mCurrent = canonical(start);
+			mSourceFolders = new java.util.HashSet<>();
+			for (String f : sourceFolders)
+				mSourceFolders.add(canonical(new File(f)).getAbsolutePath());
 			mCallback = callback;
 		}
 
 		/** Path for humans: "Phone/Books/Fantasy" instead of /storage/emulated/0/Books/Fantasy. */
 		private String displayPath(File dir) {
-			String root = mRoot.getAbsolutePath();
+			String root = canonical(mRoot).getAbsolutePath();
 			String path = dir.getAbsolutePath();
 			if (path.equals(root))
 				return mActivity.getString(R.string.fb_sel_storage);
@@ -560,7 +608,7 @@ public class FileBrowserSelection {
 			if (parent == null || parent.listFiles() == null)
 				return false;
 			// don't leave the phone storage into system folders
-			return !mCurrent.getAbsolutePath().equals(mRoot.getAbsolutePath());
+			return !mCurrent.getAbsolutePath().equals(canonical(mRoot).getAbsolutePath());
 		}
 
 		void show() {
@@ -571,26 +619,26 @@ public class FileBrowserSelection {
 				if (position < 0 || position >= mEntries.size())
 					return;
 				File f = mEntries.get(position);
+				if (f == NEW_FOLDER) {
+					askNewFolder();
+					return;
+				}
 				if (f == null)
 					return; // "no folders" hint
 				if (f.listFiles() == null) {
 					mActivity.showToast(R.string.fb_sel_cannot_list);
 					return;
 				}
-				mCurrent = f;
+				mCurrent = canonical(f);
 				refresh();
 			});
 			mDialog = new AlertDialog.Builder(mActivity)
 					.setTitle(displayPath(mCurrent))
 					.setView(list)
 					.setPositiveButton(R.string.fb_sel_move_here, (d, w) -> mCallback.onFolderSelected(mCurrent))
-					.setNeutralButton(R.string.fb_sel_new_folder, null)
 					.setNegativeButton(R.string.dlg_button_cancel, null)
 					.create();
-			mDialog.setOnShowListener(d -> {
-				mDialog.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener(v -> askNewFolder());
-				updateMoveButton();
-			});
+			mDialog.setOnShowListener(d -> updateMoveButton());
 			refresh();
 			mDialog.show();
 		}
@@ -606,6 +654,8 @@ public class FileBrowserSelection {
 		private void refresh() {
 			mEntries.clear();
 			mAdapter.clear();
+			mEntries.add(NEW_FOLDER);
+			mAdapter.add("\uFF0B " + mActivity.getString(R.string.fb_sel_new_folder));
 			if (canGoUp()) {
 				mEntries.add(mCurrent.getParentFile());
 				mAdapter.add("\u2191 " + mActivity.getString(R.string.fb_sel_up));
@@ -644,7 +694,7 @@ public class FileBrowserSelection {
 							return;
 						File nf = new File(mCurrent, name);
 						if (nf.isDirectory() || nf.mkdirs()) {
-							mCurrent = nf;
+							mCurrent = canonical(nf);
 							refresh();
 						} else {
 							mActivity.showToast(R.string.fb_sel_cannot_create);

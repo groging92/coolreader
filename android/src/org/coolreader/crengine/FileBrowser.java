@@ -308,6 +308,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 		// multiple selection action bar above the list
 		addView(mSelection.getBar(), new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT));
 		addView(mListView);
+		addView(mSelection.getBottomBar(), new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT));
 		mListView.setVisibility(VISIBLE);
 		progress = new ProgressPopup(mActivity, mListView);
 	}
@@ -1343,7 +1344,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 				parentItem = currDirectory;
 			}
 			holder.setItem(item, parentItem);
-			mSelection.decorate(view, holder.check, item);
+			mSelection.decorate(view, holder.check, holder.infoButton, item);
 //			if ( DeviceInfo.FORCE_HC_THEME ) {
 //				view.setBackgroundColor(Color.WHITE);
 //			}

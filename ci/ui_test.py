@@ -93,7 +93,7 @@ def shot(name):
 def find(pattern, ns=None, id_filter=None):
     if ns is None:
         ns, _ = nodes()
-    rx = re.compile(pattern)
+    rx = re.compile(pattern, re.IGNORECASE)
     for n in ns:
         if id_filter and id_filter not in n["id"]:
             continue
@@ -228,7 +228,7 @@ def main():
     ns = shot("move_dialog")
     n = find(r"Переместить сюда", ns)
     log("move-here enabled in source folder: %s" % (n["enabled"] if n else "n/a"))
-    tap(r"^Новая папка$")
+    tap(r"Новая папка$")
     ns = shot("new_folder_dialog")
     shell("input text Moved")
     ns = shot("new_folder_typed")
@@ -243,7 +243,7 @@ def main():
     long_press(r"^Книга 03$")
     tap(r"^Удалить$")
     ns = shot("delete_confirm")
-    tap(r"^Удалить$", id_filter="android:id/button")
+    tap(r"^Удалить$", id_filter="android:id/button1")
     time.sleep(2)
     ns = shot("after_delete")
     log(shell("ls -R %s" % BOOKS))
