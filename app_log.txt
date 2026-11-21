@@ -1,0 +1,480 @@
+11-21 20:56:10.547 I GUI START: ---- process start ----
+app: org.coolreader.fork 3.2.59-fork.9 (32647)
+device: Google sdk_gphone64_x86_64 (emu64xa), Android 14 SDK 34
+cpu: ranchu x86_64,arm64-v8a, cores 2, max heap 192MB
+11-21 20:56:10.557 I GUI cr3: ba| Screen density detected: 420DPI
+11-21 20:56:10.562 I GUI cr3: ba| diagonal=5.837365  isSmartphone=true
+11-21 20:56:10.598 I GUI cr3: fork| Migration from /storage/emulated/0/.cr3:
+date: Sat Nov 21 20:56:10 UTC 2026
+/storage/emulated/0/.cr3 not found, nothing to copy
+
+11-21 20:56:10.608 I GUI cr3: en| Engine() : static initialization
+11-21 20:56:10.609 I GUI cr3: en| trying to load library cr3engine-3-2-X w/o installation
+11-21 20:56:10.637 I GUI cr3: en| cr3engine-3-2-X loaded successfully
+11-21 20:56:10.638 I GUI cr3: en| initMountRoots()
+11-21 20:56:10.792 I GUI cr3: en| mountedPathsFromMountCmd: [/mnt/androidwritable/0/emulated, /dev/fuse, /mnt/user/0/emulated, /sys/fs/fuse/connections, /mnt/installer/0/emulated, /storage/emulated]
+11-21 20:56:10.794 I GUI cr3: en| mountedPathsFromMountFile: []
+11-21 20:56:10.795 I GUI cr3: en| mountedPathsStorageDir: []
+11-21 20:56:10.827 I GUI cr3: en| Adding FS root: /storage/emulated/0 SD
+11-21 20:56:10.828 W GUI cr3: en| cannot load resource from file /system/etc/vold.conf
+11-21 20:56:10.829 W GUI cr3: en| cannot load resource from file /system/etc/vold.fstab
+11-21 20:56:10.830 W GUI cr3: en| cannot load resource from file /etc/vold.conf
+11-21 20:56:10.831 W GUI cr3: en| cannot load resource from file /etc/vold.fstab
+11-21 20:56:10.832 W GUI cr3: en| fstab file not found
+11-21 20:56:10.837 W GUI cr3: en| Skipping duplicate path /storage/self/primary == /storage/emulated/0
+11-21 20:56:10.842 I GUI cr3: en| Mount ROOTS:
+11-21 20:56:10.845 I GUI cr3: en| *** /storage/emulated/0 'SD' isDirectory=true canRead=true canWrite=true isLink=null
+11-21 20:56:10.847 I GUI cr3: en| Engine() : DataDir exist at start.
+11-21 20:56:10.978 W cr3fork-watchdog STALL: GUI thread blocked >= 424ms
+  GUI stack:
+    at org.coolreader.crengine.Engine.initInternal(Native Method)
+    at org.coolreader.crengine.Engine.<clinit>(Engine.java:2005)
+    at org.coolreader.crengine.BaseActivity$SettingsManager.loadSettings(BaseActivity.java:2071)
+    at org.coolreader.crengine.BaseActivity$SettingsManager.<init>(BaseActivity.java:1562)
+    at org.coolreader.crengine.BaseActivity.startServices(BaseActivity.java:183)
+    at org.coolreader.CoolReader.onCreate(CoolReader.java:216)
+    at android.app.Activity.performCreate(Activity.java:8595)
+    at android.app.Activity.performCreate(Activity.java:8573)
+    at android.app.Instrumentation.callActivityOnCreate(Instrumentation.java:1456)
+    at android.app.ActivityThread.performLaunchActivity(ActivityThread.java:3764)
+    at android.app.ActivityThread.handleLaunchActivity(ActivityThread.java:3922)
+    at android.app.servertransaction.LaunchActivityItem.execute(LaunchActivityItem.java:103)
+    at android.app.servertransaction.TransactionExecutor.executeCallbacks(TransactionExecutor.java:139)
+    at android.app.servertransaction.TransactionExecutor.execute(TransactionExecutor.java:96)
+    at android.app.ActivityThread$H.handleMessage(ActivityThread.java:2443)
+    at android.os.Handler.dispatchMessage(Handler.java:106)
+    at android.os.Looper.loopOnce(Looper.java:205)
+    at android.os.Looper.loop(Looper.java:294)
+    at android.app.ActivityThread.main(ActivityThread.java:8177)
+    at java.lang.reflect.Method.invoke(Native Method)
+    at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:552)
+    at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:971)
+  ENGINE stack:
+11-21 20:56:11.162 I GUI cr3: en| /storage/emulated/0/.cr3fork/cache will be used for cache, maxCacheSize=536870912
+11-21 20:56:11.163 I GUI cr3: en| /storage/emulated/0/.cr3fork/cache will be used for cache, maxCacheSize=536870912
+11-21 20:56:11.170 I GUI cr3: en| Engine() : initialization done
+11-21 20:56:11.178 W GUI cr3: cr| force assignment of central tap zone to READER_MENU
+11-21 20:56:11.254 I GUI cr3: sv| First activity is created
+11-21 20:56:11.259 I GUI cr3: sc| Checking FS root /storage/emulated/0
+11-21 20:56:11.267 I GUI cr3: sc| Adding FS root: /storage/emulated/0  SD
+11-21 20:56:11.271 I GUI cr3: sc| Checking FS root /data/user/0/org.coolreader.fork/files/downloads
+11-21 20:56:11.274 W GUI cr3: sc| Skipping /data/user/0/org.coolreader.fork/files/downloads - it's not a readable directory
+11-21 20:56:11.276 I GUI cr3: sc| Checking FS root /data/user/0/org.coolreader.fork/cache/bookCache
+11-21 20:56:11.277 W GUI cr3: sc| Skipping /data/user/0/org.coolreader.fork/cache/bookCache - it's not a readable directory
+11-21 20:56:11.355 I GUI cr3: cr| CoolReader.onCreate() entered
+11-21 20:56:11.356 I GUI cr3: ba| BaseActivity.onCreate() entered
+11-21 20:56:11.442 I GUI cr3: ba| CoolReader version : 3.2.59-fork.9
+11-21 20:56:11.500 I GUI cr3: ba| setCurrentTheme(Theme[code=LIGHT, themeId=2131492930])
+11-21 20:56:11.658 I GUI cr3: cr| All files access already granted.
+11-21 20:56:11.789 I GUI cr3: cr| CoolReader.onCreate() exiting
+11-21 20:56:11.790 I GUI cr3: cr| CoolReader.onStart() version=3.2.59-fork.9
+11-21 20:56:11.804 I GUI cr3: cr| getLastLocation() = null
+11-21 20:56:11.807 I GUI cr3: cr| CoolReader.onStart() exiting
+11-21 20:56:11.808 I GUI cr3: cr| CoolReader.onPostCreate()
+11-21 20:56:11.820 I GUI cr3: cr| CoolReader.onResume()
+11-21 20:56:11.820 I GUI cr3: ba| CoolReader.onResume()
+11-21 20:56:11.824 I GUI cr3: cr| CoolReader.onPostResume()
+11-21 20:56:11.843 I GUI cr3: db| onCreate()
+11-21 20:56:11.845 W GUI cr3: st| Thread is not yet started, just adding to queue Task[OpenDatabaseTask]
+11-21 20:56:11.847 I GUI cr3: db| onBind(): Intent { cmp=org.coolreader.fork/org.coolreader.db.CRDBService }
+11-21 20:56:11.851 I crdb cr3: st| Running service thread
+11-21 20:56:11.853 I crdb cr3: st| Service thread handler is created
+11-21 20:56:11.916 W crdb cr3: st| Executing queued task Task[OpenDatabaseTask]
+11-21 20:56:11.933 I crdb cr3: db| DB directory: /storage/emulated/0/.cr3fork
+11-21 20:56:11.934 I crdb cr3: bdb| opening DB /storage/emulated/0/.cr3fork/cr3db.sqlite
+11-21 20:56:11.981 P cr3fork-watchdog PERF: gui.stall 1295ms
+11-21 20:56:12.338 W GUI cr3: cr| No current book in history
+11-21 20:56:12.395 W cr3fork-watchdog STALL: GUI thread blocked >= 541ms
+  GUI stack:
+    at java.util.LinkedList.size(LinkedList.java:330)
+    at org.coolreader.db.ServiceThread.postQueuedTasks(ServiceThread.java:90)
+    at org.coolreader.db.ServiceThread.post(ServiceThread.java:53)
+    at org.coolreader.db.BaseService.execTask(BaseService.java:59)
+    at org.coolreader.db.CRDBService.loadFavoriteFolders(CRDBService.java:627)
+    at org.coolreader.db.CRDBService$LocalBinder.loadFavoriteFolders(CRDBService.java:796)
+    at org.coolreader.crengine.FileSystemFolders.loadFavoriteFoldersAndDo(FileSystemFolders.java:170)
+    at org.coolreader.crengine.FileSystemFolders.loadFavoriteFolders(FileSystemFolders.java:87)
+    at org.coolreader.crengine.CRRootView.lambda$createViews$23$org-coolreader-crengine-CRRootView(CRRootView.java:526)
+    at org.coolreader.crengine.CRRootView$$ExternalSyntheticLambda5.run(D8$$SyntheticClass:0)
+    at org.coolreader.db.CRDBServiceAccessor.bind(CRDBServiceAccessor.java:66)
+    at org.coolreader.crengine.BaseActivity.waitForCRDBService(BaseActivity.java:117)
+    at org.coolreader.crengine.CRRootView.createViews(CRRootView.java:526)
+    at org.coolreader.crengine.CRRootView.<init>(CRRootView.java:79)
+    at org.coolreader.CoolReader.lambda$onStart$7$org-coolreader-CoolReader(CoolReader.java:1065)
+    at org.coolreader.CoolReader$$ExternalSyntheticLambda0.run(D8$$SyntheticClass:0)
+    at org.coolreader.db.CRDBServiceAccessor$1.onServiceConnected(CRDBServiceAccessor.java:111)
+    at android.app.LoadedApk$ServiceDispatcher.doConnected(LoadedApk.java:2198)
+    at android.app.LoadedApk$ServiceDispatcher$RunConnection.run(LoadedApk.java:2231)
+    at android.os.Handler.handleCallback(Handler.java:958)
+    at android.os.Handler.dispatchMessage(Handler.java:99)
+    at android.os.Looper.loopOnce(Looper.java:205)
+    at android.os.Looper.loop(Looper.java:294)
+    at android.app.ActivityThread.main(ActivityThread.java:8177)
+    at java.lang.reflect.Method.invoke(Native Method)
+    at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:552)
+    at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:971)
+  ENGINE stack:
+    at android.os.MessageQueue.nativePollOnce(Native Method)
+    at android.os.MessageQueue.next(MessageQueue.java:335)
+    at android.os.Looper.loopOnce(Looper.java:162)
+    at android.os.Looper.loop(Looper.java:294)
+    at org.coolreader.crengine.BackgroundThread.run(BackgroundThread.java:142)
+11-21 20:56:12.411 I GUI cr3: cr| New current frame: class org.coolreader.crengine.CRRootView
+11-21 20:56:12.415 I GUI cr3: ba| setCurrentTheme(Theme[code=LIGHT, themeId=2131492930])
+11-21 20:56:12.529 W GUI cr3: cr| No current book in history
+11-21 20:56:12.773 I GUI cr3: cr| Settings successfully saved to file /storage/emulated/0/.cr3fork/cr3.ini
+11-21 20:56:12.779 I GUI cr3: cr| getLastNotification() = 0
+11-21 20:56:14.220 P cr3fork-watchdog PERF: gui.stall 2340ms
+11-21 20:56:15.414 I crdb cr3: mdb| Update 'format' field in table 'book'...
+11-21 20:56:15.488 I crdb cr3: mdb| mainDB: 0 authors, 0 series, 0 books, 0 bookmarks, 0 folders
+11-21 20:56:15.489 I crdb cr3: bdb| opening DB /storage/emulated/0/.cr3fork/cr3db_cover.sqlite
+11-21 20:56:15.522 I crdb cr3: cdb| coverDB: 0 coverpages
+11-21 20:56:15.526 I crdb cr3: mdb| loadFavoriteFolders()
+11-21 20:56:15.529 I crdb cr3: mdb| loadFavoriteFolders()
+11-21 20:56:15.535 I crdb cr3: mdb| loadOPDSCatalogs()
+11-21 20:56:15.542 I crdb cr3: mdb| loadOPDSCatalogs()
+11-21 20:56:15.547 I crdb cr3: mdb| loadOPDSCatalogs()
+11-21 20:56:15.581 W GUI cr3: cr| No current book in history
+11-21 20:56:15.615 W GUI cr3: cr| No current book in history
+11-21 20:56:15.667 W GUI cr3: cr| No current book in history
+11-21 20:56:33.901 I GUI cr3: cr| Settings successfully saved to file /storage/emulated/0/.cr3fork/cr3.ini
+11-21 20:56:33.912 I GUI cr3: cr| getLastNotification() = 0
+11-21 20:56:33.926 I GUI cr3: cr| getLastNotification() = 1
+11-21 20:56:39.339 I GUI cr3: cr| getLastNotification() = 1
+11-21 20:56:39.360 I GUI cr3: cr| getLastNotification() = 3
+11-21 20:56:45.247 I GUI cr3: ba| CoolReader.onPause() : saving reader state
+11-21 20:56:45.250 I GUI cr3: cr| onNewIntent : Intent { flg=0x10000000 cmp=org.coolreader.fork/org.coolreader.CoolReader (has extras) }
+11-21 20:56:45.252 I GUI cr3: cr| CoolReader.onResume()
+11-21 20:56:45.253 I GUI cr3: ba| CoolReader.onResume()
+11-21 20:56:45.258 I GUI cr3: cr| CoolReader.onPostResume()
+11-21 20:56:45.578 E GUI cr3: fb| FileBrowser.init() called
+11-21 20:56:45.606 I GUI cr3: cr| New current frame: class org.coolreader.crengine.BrowserViewLayout
+11-21 20:56:45.611 I GUI cr3: ba| setCurrentTheme(Theme[code=LIGHT, themeId=2131492930])
+11-21 20:56:45.806 W cr3fork-watchdog STALL: GUI thread blocked >= 404ms
+  GUI stack:
+    at android.graphics.Paint.nGetFontMetricsInt(Native Method)
+    at android.graphics.Paint.getFontMetricsInt(Paint.java:2321)
+    at android.text.TextLine.expandMetricsFromPaint(TextLine.java:977)
+    at android.text.TextLine.handleRun(TextLine.java:1343)
+    at android.text.TextLine.measureRun(TextLine.java:673)
+    at android.text.TextLine.measure(TextLine.java:414)
+    at android.text.TextLine.metrics(TextLine.java:314)
+    at android.text.BoringLayout.isBoring(BoringLayout.java:501)
+    at android.widget.TextView.onMeasure(TextView.java:10882)
+    at android.view.View.measure(View.java:27122)
+    at android.view.ViewGroup.measureChildWithMargins(ViewGroup.java:7008)
+    at android.widget.LinearLayout.measureChildBeforeLayout(LinearLayout.java:1608)
+    at android.widget.LinearLayout.measureHorizontal(LinearLayout.java:1240)
+    at android.widget.LinearLayout.onMeasure(LinearLayout.java:723)
+    at android.view.View.measure(View.java:27122)
+    at android.view.ViewGroup.measureChildWithMargins(ViewGroup.java:7008)
+    at android.widget.LinearLayout.measureChildBeforeLayout(LinearLayout.java:1608)
+    at android.widget.LinearLayout.measureVertical(LinearLayout.java:878)
+    at android.widget.LinearLayout.onMeasure(LinearLayout.java:721)
+    at android.view.View.measure(View.java:27122)
+    at android.widget.LinearLayout.measureHorizontal(LinearLayout.java:1435)
+    at android.widget.LinearLayout.onMeasure(LinearLayout.java:723)
+    at android.view.View.measure(View.java:27122)
+    at android.widget.ListView.measureScrapChild(ListView.java:1348)
+    at android.widget.ListView.measureHeightOfChildren(ListView.java:1417)
+    at android.widget.ListView.onMeasure(ListView.java:1321)
+    at android.view.View.measure(View.java:27122)
+    at android.view.ViewGroup.measureChildWithMargins(ViewGroup.java:7008)
+    at android.widget.LinearLayout.measureChildBeforeLayout(LinearLayout.java:1608)
+    at android.widget.LinearLayout.measureVertical(LinearLayout.java:878)
+  ENGINE stack:
+    at android.os.MessageQueue.nativePollOnce(Native Method)
+    at android.os.MessageQueue.next(MessageQueue.java:335)
+    at android.os.Looper.loopOnce(Looper.java:162)
+    at android.os.Looper.loop(Looper.java:294)
+    at org.coolreader.crengine.BackgroundThread.run(BackgroundThread.java:142)
+11-21 20:56:46.007 P cr3fork-watchdog PERF: gui.stall 593ms
+11-21 20:56:47.423 W cr3fork-watchdog STALL: GUI thread blocked >= 401ms
+  GUI stack:
+    at android.graphics.HardwareRenderer.nSyncAndDrawFrame(Native Method)
+    at android.graphics.HardwareRenderer.syncAndDrawFrame(HardwareRenderer.java:484)
+    at android.view.ThreadedRenderer.draw(ThreadedRenderer.java:816)
+    at android.view.ViewRootImpl.draw(ViewRootImpl.java:4939)
+    at android.view.ViewRootImpl.performDraw(ViewRootImpl.java:4643)
+    at android.view.ViewRootImpl.performTraversals(ViewRootImpl.java:3822)
+    at android.view.ViewRootImpl.doTraversal(ViewRootImpl.java:2465)
+    at android.view.ViewRootImpl$TraversalRunnable.run(ViewRootImpl.java:9305)
+    at android.view.Choreographer$CallbackRecord.run(Choreographer.java:1339)
+    at android.view.Choreographer$CallbackRecord.run(Choreographer.java:1348)
+    at android.view.Choreographer.doCallbacks(Choreographer.java:952)
+    at android.view.Choreographer.doFrame(Choreographer.java:882)
+    at android.view.Choreographer$FrameDisplayEventReceiver.run(Choreographer.java:1322)
+    at android.os.Handler.handleCallback(Handler.java:958)
+    at android.os.Handler.dispatchMessage(Handler.java:99)
+    at android.os.Looper.loopOnce(Looper.java:205)
+    at android.os.Looper.loop(Looper.java:294)
+    at android.app.ActivityThread.main(ActivityThread.java:8177)
+    at java.lang.reflect.Method.invoke(Native Method)
+    at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:552)
+    at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:971)
+  ENGINE stack:
+    at android.os.MessageQueue.nativePollOnce(Native Method)
+    at android.os.MessageQueue.next(MessageQueue.java:335)
+    at android.os.Looper.loopOnce(Looper.java:162)
+    at android.os.Looper.loop(Looper.java:294)
+    at org.coolreader.crengine.BackgroundThread.run(BackgroundThread.java:142)
+11-21 20:56:47.624 P cr3fork-watchdog PERF: gui.stall 481ms
+11-21 20:57:05.271 W cr3fork-watchdog STALL: GUI thread blocked >= 401ms
+  GUI stack:
+    at android.util.StateSet.stateSetMatches(StateSet.java:169)
+    at android.content.res.ColorStateList.getColorForState(ColorStateList.java:614)
+    at android.widget.TextView.updateTextColors(TextView.java:6670)
+    at android.widget.TextView.drawableStateChanged(TextView.java:6705)
+    at android.view.View.refreshDrawableState(View.java:24933)
+    at android.view.View.dispatchAttachedToWindow(View.java:22012)
+    at android.view.ViewGroup.dispatchAttachedToWindow(ViewGroup.java:3497)
+    at android.view.ViewGroup.dispatchAttachedToWindow(ViewGroup.java:3497)
+    at android.view.ViewGroup.addViewInner(ViewGroup.java:5318)
+    at android.view.ViewGroup.addViewInLayout(ViewGroup.java:5251)
+    at android.widget.ListView.setupChild(ListView.java:2147)
+    at android.widget.ListView.makeAndAddView(ListView.java:2068)
+    at android.widget.ListView.fillDown(ListView.java:791)
+    at android.widget.ListView.fillSpecific(ListView.java:1502)
+    at android.widget.ListView.layoutChildren(ListView.java:1813)
+    at android.widget.AbsListView.onLayout(AbsListView.java:2263)
+    at android.view.View.layout(View.java:24421)
+    at android.view.ViewGroup.layout(ViewGroup.java:6440)
+    at android.widget.LinearLayout.setChildFrame(LinearLayout.java:1891)
+    at android.widget.LinearLayout.layoutVertical(LinearLayout.java:1729)
+    at android.widget.LinearLayout.onLayout(LinearLayout.java:1638)
+    at android.view.View.layout(View.java:24421)
+    at android.view.ViewGroup.layout(ViewGroup.java:6440)
+    at org.coolreader.crengine.BrowserViewLayout.onLayout(BrowserViewLayout.java:105)
+    at android.view.View.layout(View.java:24421)
+    at android.view.ViewGroup.layout(ViewGroup.java:6440)
+    at android.widget.FrameLayout.layoutChildren(FrameLayout.java:332)
+    at android.widget.FrameLayout.onLayout(FrameLayout.java:270)
+    at android.view.View.layout(View.java:24421)
+    at android.view.ViewGroup.layout(ViewGroup.java:6440)
+  ENGINE stack:
+    at android.os.MessageQueue.nativePollOnce(Native Method)
+    at android.os.MessageQueue.next(MessageQueue.java:335)
+    at android.os.Looper.loopOnce(Looper.java:162)
+    at android.os.Looper.loop(Looper.java:294)
+    at org.coolreader.crengine.BackgroundThread.run(BackgroundThread.java:142)
+11-21 20:57:05.691 P cr3fork-watchdog PERF: gui.stall 806ms
+11-21 20:57:06.118 W cr3fork-watchdog STALL: GUI thread blocked >= 449ms
+  GUI stack:
+    at android.graphics.HardwareRenderer.nSyncAndDrawFrame(Native Method)
+    at android.graphics.HardwareRenderer.syncAndDrawFrame(HardwareRenderer.java:484)
+    at android.view.ThreadedRenderer.draw(ThreadedRenderer.java:816)
+    at android.view.ViewRootImpl.draw(ViewRootImpl.java:4939)
+    at android.view.ViewRootImpl.performDraw(ViewRootImpl.java:4643)
+    at android.view.ViewRootImpl.performTraversals(ViewRootImpl.java:3822)
+    at android.view.ViewRootImpl.doTraversal(ViewRootImpl.java:2465)
+    at android.view.ViewRootImpl$TraversalRunnable.run(ViewRootImpl.java:9305)
+    at android.view.Choreographer$CallbackRecord.run(Choreographer.java:1339)
+    at android.view.Choreographer$CallbackRecord.run(Choreographer.java:1348)
+    at android.view.Choreographer.doCallbacks(Choreographer.java:952)
+    at android.view.Choreographer.doFrame(Choreographer.java:882)
+    at android.view.Choreographer$FrameDisplayEventReceiver.run(Choreographer.java:1322)
+    at android.os.Handler.handleCallback(Handler.java:958)
+    at android.os.Handler.dispatchMessage(Handler.java:99)
+    at android.os.Looper.loopOnce(Looper.java:205)
+    at android.os.Looper.loop(Looper.java:294)
+    at android.app.ActivityThread.main(ActivityThread.java:8177)
+    at java.lang.reflect.Method.invoke(Native Method)
+    at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:552)
+    at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:971)
+  ENGINE stack:
+    at android.os.MessageQueue.nativePollOnce(Native Method)
+    at android.os.MessageQueue.next(MessageQueue.java:335)
+    at android.os.Looper.loopOnce(Looper.java:162)
+    at android.os.Looper.loop(Looper.java:294)
+    at org.coolreader.crengine.BackgroundThread.run(BackgroundThread.java:142)
+11-21 20:57:06.354 P cr3fork-watchdog PERF: gui.stall 552ms
+11-21 20:57:16.779 I crdb cr3: bdb| flush: committing changes
+11-21 20:58:10.257 W cr3fork-watchdog STALL: GUI thread blocked >= 425ms
+  GUI stack:
+    at android.graphics.HardwareRenderer.nSyncAndDrawFrame(Native Method)
+    at android.graphics.HardwareRenderer.syncAndDrawFrame(HardwareRenderer.java:484)
+    at android.view.ThreadedRenderer.draw(ThreadedRenderer.java:816)
+    at android.view.ViewRootImpl.draw(ViewRootImpl.java:4939)
+    at android.view.ViewRootImpl.performDraw(ViewRootImpl.java:4643)
+    at android.view.ViewRootImpl.performTraversals(ViewRootImpl.java:3822)
+    at android.view.ViewRootImpl.doTraversal(ViewRootImpl.java:2465)
+    at android.view.ViewRootImpl$TraversalRunnable.run(ViewRootImpl.java:9305)
+    at android.view.Choreographer$CallbackRecord.run(Choreographer.java:1339)
+    at android.view.Choreographer$CallbackRecord.run(Choreographer.java:1348)
+    at android.view.Choreographer.doCallbacks(Choreographer.java:952)
+    at android.view.Choreographer.doFrame(Choreographer.java:882)
+    at android.view.Choreographer$FrameDisplayEventReceiver.run(Choreographer.java:1322)
+    at android.os.Handler.handleCallback(Handler.java:958)
+    at android.os.Handler.dispatchMessage(Handler.java:99)
+    at android.os.Looper.loopOnce(Looper.java:205)
+    at android.os.Looper.loop(Looper.java:294)
+    at android.app.ActivityThread.main(ActivityThread.java:8177)
+    at java.lang.reflect.Method.invoke(Native Method)
+    at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:552)
+    at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:971)
+  ENGINE stack:
+    at android.os.MessageQueue.nativePollOnce(Native Method)
+    at android.os.MessageQueue.next(MessageQueue.java:335)
+    at android.os.Looper.loopOnce(Looper.java:162)
+    at android.os.Looper.loop(Looper.java:294)
+    at org.coolreader.crengine.BackgroundThread.run(BackgroundThread.java:142)
+11-21 20:58:10.465 P cr3fork-watchdog PERF: gui.stall 582ms
+11-21 20:58:17.155 W cr3fork-watchdog STALL: GUI thread blocked >= 451ms
+  GUI stack:
+    at android.graphics.HardwareRenderer.nSetStopped(Native Method)
+    at android.graphics.HardwareRenderer.setStopped(HardwareRenderer.java:525)
+    at android.view.ViewRootImpl.performDraw(ViewRootImpl.java:4676)
+    at android.view.ViewRootImpl.performTraversals(ViewRootImpl.java:3822)
+    at android.view.ViewRootImpl.doTraversal(ViewRootImpl.java:2465)
+    at android.view.ViewRootImpl$TraversalRunnable.run(ViewRootImpl.java:9305)
+    at android.view.Choreographer$CallbackRecord.run(Choreographer.java:1339)
+    at android.view.Choreographer$CallbackRecord.run(Choreographer.java:1348)
+    at android.view.Choreographer.doCallbacks(Choreographer.java:952)
+    at android.view.Choreographer.doFrame(Choreographer.java:882)
+    at android.view.Choreographer$FrameDisplayEventReceiver.run(Choreographer.java:1322)
+    at android.os.Handler.handleCallback(Handler.java:958)
+    at android.os.Handler.dispatchMessage(Handler.java:99)
+    at android.os.Looper.loopOnce(Looper.java:205)
+    at android.os.Looper.loop(Looper.java:294)
+    at android.app.ActivityThread.main(ActivityThread.java:8177)
+    at java.lang.reflect.Method.invoke(Native Method)
+    at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:552)
+    at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:971)
+  ENGINE stack:
+    at android.os.MessageQueue.nativePollOnce(Native Method)
+    at android.os.MessageQueue.next(MessageQueue.java:335)
+    at android.os.Looper.loopOnce(Looper.java:162)
+    at android.os.Looper.loop(Looper.java:294)
+    at org.coolreader.crengine.BackgroundThread.run(BackgroundThread.java:142)
+11-21 20:58:17.398 P cr3fork-watchdog PERF: gui.stall 484ms
+11-21 20:58:18.817 W cr3fork-watchdog STALL: GUI thread blocked >= 401ms
+  GUI stack:
+    at android.graphics.HardwareRenderer.nSyncAndDrawFrame(Native Method)
+    at android.graphics.HardwareRenderer.syncAndDrawFrame(HardwareRenderer.java:484)
+    at android.view.ThreadedRenderer.draw(ThreadedRenderer.java:816)
+    at android.view.ViewRootImpl.draw(ViewRootImpl.java:4939)
+    at android.view.ViewRootImpl.performDraw(ViewRootImpl.java:4643)
+    at android.view.ViewRootImpl.performTraversals(ViewRootImpl.java:3822)
+    at android.view.ViewRootImpl.doTraversal(ViewRootImpl.java:2465)
+    at android.view.ViewRootImpl$TraversalRunnable.run(ViewRootImpl.java:9305)
+    at android.view.Choreographer$CallbackRecord.run(Choreographer.java:1339)
+    at android.view.Choreographer$CallbackRecord.run(Choreographer.java:1348)
+    at android.view.Choreographer.doCallbacks(Choreographer.java:952)
+    at android.view.Choreographer.doFrame(Choreographer.java:882)
+    at android.view.Choreographer$FrameDisplayEventReceiver.run(Choreographer.java:1322)
+    at android.os.Handler.handleCallback(Handler.java:958)
+    at android.os.Handler.dispatchMessage(Handler.java:99)
+    at android.os.Looper.loopOnce(Looper.java:205)
+    at android.os.Looper.loop(Looper.java:294)
+    at android.app.ActivityThread.main(ActivityThread.java:8177)
+    at java.lang.reflect.Method.invoke(Native Method)
+    at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:552)
+    at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:971)
+  ENGINE stack:
+    at android.os.MessageQueue.nativePollOnce(Native Method)
+    at android.os.MessageQueue.next(MessageQueue.java:335)
+    at android.os.Looper.loopOnce(Looper.java:162)
+    at android.os.Looper.loop(Looper.java:294)
+    at org.coolreader.crengine.BackgroundThread.run(BackgroundThread.java:142)
+11-21 20:58:19.019 P cr3fork-watchdog PERF: gui.stall 541ms
+11-21 20:58:19.705 W cr3fork-watchdog STALL: GUI thread blocked >= 410ms
+  GUI stack:
+    at android.graphics.HardwareRenderer.nSetSurface(Native Method)
+    at android.graphics.HardwareRenderer.setSurface(HardwareRenderer.java:340)
+    at android.graphics.HardwareRenderer.setSurface(HardwareRenderer.java:323)
+    at android.view.ThreadedRenderer.setSurface(ThreadedRenderer.java:459)
+    at android.view.ThreadedRenderer.updateSurface(ThreadedRenderer.java:451)
+    at android.view.ViewRootImpl.performTraversals(ViewRootImpl.java:3372)
+    at android.view.ViewRootImpl.doTraversal(ViewRootImpl.java:2465)
+    at android.view.ViewRootImpl$TraversalRunnable.run(ViewRootImpl.java:9305)
+    at android.view.Choreographer$CallbackRecord.run(Choreographer.java:1339)
+    at android.view.Choreographer$CallbackRecord.run(Choreographer.java:1348)
+    at android.view.Choreographer.doCallbacks(Choreographer.java:952)
+    at android.view.Choreographer.doFrame(Choreographer.java:882)
+    at android.view.Choreographer$FrameDisplayEventReceiver.run(Choreographer.java:1322)
+    at android.os.Handler.handleCallback(Handler.java:958)
+    at android.os.Handler.dispatchMessage(Handler.java:99)
+    at android.os.Looper.loopOnce(Looper.java:205)
+    at android.os.Looper.loop(Looper.java:294)
+    at android.app.ActivityThread.main(ActivityThread.java:8177)
+    at java.lang.reflect.Method.invoke(Native Method)
+    at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:552)
+    at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:971)
+  ENGINE stack:
+    at android.os.MessageQueue.nativePollOnce(Native Method)
+    at android.os.MessageQueue.next(MessageQueue.java:335)
+    at android.os.Looper.loopOnce(Looper.java:162)
+    at android.os.Looper.loop(Looper.java:294)
+    at org.coolreader.crengine.BackgroundThread.run(BackgroundThread.java:142)
+11-21 20:58:20.167 P cr3fork-watchdog PERF: gui.stall 814ms
+11-21 20:58:29.674 W cr3fork-watchdog STALL: GUI thread blocked >= 422ms
+  GUI stack:
+    at android.os.BinderProxy.transactNative(Native Method)
+    at android.os.BinderProxy.transact(BinderProxy.java:584)
+    at android.view.IWindowSession$Stub$Proxy.remove(IWindowSession.java:1308)
+    at android.view.ViewRootImpl.dispatchDetachedFromWindow(ViewRootImpl.java:5589)
+    at android.view.ViewRootImpl.doDie(ViewRootImpl.java:8811)
+    at android.view.ViewRootImpl.die(ViewRootImpl.java:8787)
+    at android.view.WindowManagerGlobal.removeViewLocked(WindowManagerGlobal.java:512)
+    at android.view.WindowManagerGlobal.removeView(WindowManagerGlobal.java:453)
+    at android.view.WindowManagerImpl.removeViewImmediate(WindowManagerImpl.java:208)
+    at android.app.Dialog.dismissDialog(Dialog.java:404)
+    at android.app.Dialog.dismiss(Dialog.java:386)
+    at com.android.internal.app.AlertController$ButtonHandler.handleMessage(AlertController.java:179)
+    at android.os.Handler.dispatchMessage(Handler.java:106)
+    at android.os.Looper.loopOnce(Looper.java:205)
+    at android.os.Looper.loop(Looper.java:294)
+    at android.app.ActivityThread.main(ActivityThread.java:8177)
+    at java.lang.reflect.Method.invoke(Native Method)
+    at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:552)
+    at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:971)
+  ENGINE stack:
+    at android.os.MessageQueue.nativePollOnce(Native Method)
+    at android.os.MessageQueue.next(MessageQueue.java:335)
+    at android.os.Looper.loopOnce(Looper.java:162)
+    at android.os.Looper.loop(Looper.java:294)
+    at org.coolreader.crengine.BackgroundThread.run(BackgroundThread.java:142)
+11-21 20:58:29.891 P cr3fork-watchdog PERF: gui.stall 513ms
+11-21 20:58:31.709 W cr3fork-watchdog STALL: GUI thread blocked >= 405ms
+  GUI stack:
+    at android.graphics.HardwareRenderer.nSyncAndDrawFrame(Native Method)
+    at android.graphics.HardwareRenderer.syncAndDrawFrame(HardwareRenderer.java:484)
+    at android.view.ThreadedRenderer.draw(ThreadedRenderer.java:816)
+    at android.view.ViewRootImpl.draw(ViewRootImpl.java:4939)
+    at android.view.ViewRootImpl.performDraw(ViewRootImpl.java:4643)
+    at android.view.ViewRootImpl.performTraversals(ViewRootImpl.java:3822)
+    at android.view.ViewRootImpl.doTraversal(ViewRootImpl.java:2465)
+    at android.view.ViewRootImpl$TraversalRunnable.run(ViewRootImpl.java:9305)
+    at android.view.Choreographer$CallbackRecord.run(Choreographer.java:1339)
+    at android.view.Choreographer$CallbackRecord.run(Choreographer.java:1348)
+    at android.view.Choreographer.doCallbacks(Choreographer.java:952)
+    at android.view.Choreographer.doFrame(Choreographer.java:882)
+    at android.view.Choreographer$FrameDisplayEventReceiver.run(Choreographer.java:1322)
+    at android.os.Handler.handleCallback(Handler.java:958)
+    at android.os.Handler.dispatchMessage(Handler.java:99)
+    at android.os.Looper.loopOnce(Looper.java:205)
+    at android.os.Looper.loop(Looper.java:294)
+    at android.app.ActivityThread.main(ActivityThread.java:8177)
+    at java.lang.reflect.Method.invoke(Native Method)
+    at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:552)
+    at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:971)
+  ENGINE stack:
+    at android.os.MessageQueue.nativePollOnce(Native Method)
+    at android.os.MessageQueue.next(MessageQueue.java:335)
+    at android.os.Looper.loopOnce(Looper.java:162)
+    at android.os.Looper.loop(Looper.java:294)
+    at org.coolreader.crengine.BackgroundThread.run(BackgroundThread.java:142)
+11-21 20:58:31.925 P cr3fork-watchdog PERF: gui.stall 557ms
+11-21 20:58:36.862 I GUI cr3: Found possible mount point /storage
+11-21 20:58:36.863 I GUI cr3: sc| Checking FS root /storage
+11-21 20:58:36.864 W GUI cr3: sc| Skipping /storage - it's not a readable directory
+11-21 20:58:36.874 E GUI cr3: Cannot find root directory for file /storage/emulated/0/Books/Test/book01.fb2
+11-21 20:58:36.886 I GUI cr3: Found possible mount point /storage
+11-21 20:58:36.887 I GUI cr3: sc| Checking FS root /storage
+11-21 20:58:36.888 W GUI cr3: sc| Skipping /storage - it's not a readable directory
+11-21 20:58:36.902 E GUI cr3: Cannot find root directory for file /storage/emulated/0/Books/Test/book02.fb2
+11-21 20:58:36.916 I GUI cr3: Found possible mount point /storage
+11-21 20:58:36.917 I GUI cr3: sc| Checking FS root /storage
+11-21 20:58:36.917 W GUI cr3: sc| Skipping /storage - it's not a readable directory
+11-21 20:58:36.927 E GUI cr3: Cannot find root directory for file /storage/emulated/0/Books/Test/Moved
+11-21 20:59:20.969 I crdb cr3: bdb| flush: committing changes
