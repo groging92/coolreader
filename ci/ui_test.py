@@ -191,6 +191,15 @@ def main():
         time.sleep(6)
         ns = shot("folder_retry")
 
+    # 0. re-entering a folder keeps book titles
+    tap(r"^Archive$")
+    time.sleep(2)
+    shot("in_archive")
+    shell("input keyevent KEYCODE_BACK")
+    time.sleep(5)
+    ns = shot("back_to_folder")
+    log("titles after re-enter: %s" % ("OK" if find(r"^Книга 01$", ns) else "LOST"))
+
     # 1. long press starts selection
     long_press(r"^Книга 01$")
     ns = shot("long_press_book01")

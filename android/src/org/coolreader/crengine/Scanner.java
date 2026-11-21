@@ -184,7 +184,12 @@ public class Scanner extends FileInfoChangeSource {
 							continue;
 						}
 						boolean isArc = Engine.isArchive(pathName);
-						FileInfo item = !rescan ? mFileList.get(pathName) : null;
+						// fork: on rescan keep already scanned book info (title, authors, state) for unchanged
+						// regular files; only archives need a real rescan (they may turn into folders).
+						// Upstream dropped it, and re-opened folders showed bare file names.
+						FileInfo item = mFileList.get(pathName);
+						if (item != null && rescan && (isArc || item.isArchive || item.size != f.length()))
+							item = null;
 						boolean isNew = false;
 						if ( item==null ) {
 							item = new FileInfo( f );
