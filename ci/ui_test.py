@@ -41,7 +41,7 @@ def shell(cmd, timeout=60):
 
 
 def nodes():
-    for _ in range(3):
+    for _ in range(6):
         shell("uiautomator dump /sdcard/ui.xml")
         xml = adb("exec-out", "cat /sdcard/ui.xml")
         start = xml.find("<?xml")
@@ -60,6 +60,15 @@ def nodes():
                         "checked": n.get("checked") == "true", "enabled": n.get("enabled") == "true",
                         "x": (x1 + x2) // 2, "y": (y1 + y2) // 2, "bounds": (x1, y1, x2, y2),
                     })
+                # system "app isn't responding" dialogs of the slow emulator: press Wait
+                anr = [n for n in res if "isn't responding" in n["text"] or "не отвечает" in n["text"]]
+                if anr:
+                    wait = [n for n in res if n["text"] in ("Wait", "Подождать")]
+                    if wait:
+                        print("dismissing ANR dialog: " + anr[0]["text"], flush=True)
+                        shell("input tap %d %d" % (wait[0]["x"], wait[0]["y"]))
+                        time.sleep(2)
+                        continue
                 return res, xml[start:]
             except ET.ParseError:
                 pass
@@ -149,6 +158,8 @@ def main():
     log(shell("appops set --uid %s MANAGE_EXTERNAL_STORAGE allow" % PKG).strip())
     log(shell("cmd locale set-app-locales %s --user 0 --locales ru-RU" % PKG).strip())
     shell("settings put secure immersive_mode_confirmations confirmed")
+    shell("settings put global hide_error_dialogs 1")
+    time.sleep(20)  # let the launcher settle after boot
     shell("settings put system screen_off_timeout 1800000")
     shell("svc power stayon true")
 
@@ -167,7 +178,7 @@ def main():
     time.sleep(12)
     ns = shot("first_launch")
     for _ in range(3):
-        b = find(r"^(OK|ОК|Ок|Закрыть|Close|Allow|Разрешить)$", ns)
+        b = find(r"^(OK|ОК|Ок|ДА|Да|YES|Yes|Закрыть|Close|Allow|Разрешить)$", ns)
         if b is None:
             break
         tap_node(b)
