@@ -54,8 +54,6 @@ public class FileBrowserSelection {
 
 	public static final Logger log = L.create("fbsel");
 
-	private static final int SELECTED_ITEM_COLOR = 0x5533B5E5;
-
 	private final CoolReader mActivity;
 	private final FileBrowser mBrowser;
 	private final LinkedHashMap<String, FileInfo> mSelected = new LinkedHashMap<>();
@@ -109,10 +107,7 @@ public class FileBrowserSelection {
 			mSelected.remove(key);
 		else
 			mSelected.put(key, item);
-		if (mSelected.isEmpty())
-			finish();
-		else
-			update();
+		update();
 	}
 
 	private void toggleAll() {
@@ -138,30 +133,45 @@ public class FileBrowserSelection {
 			else
 				mSelected.put(f.getPathName(), f);
 		}
-		if (mSelected.isEmpty())
-			finish();
-		else
-			update();
+		update();
 	}
 
 	/**
-	 * Highlight list item view if the item is selected.
+	 * Add hidden check box at the left of a book list item.
 	 */
-	@SuppressWarnings("deprecation")
-	public void decorate(View view, FileInfo item) {
-		if (view == null)
+	public android.widget.CheckBox addCheckBox(LinearLayout row) {
+		android.widget.CheckBox cb = new android.widget.CheckBox(mActivity);
+		// clicks go to the list item, the box only shows the state
+		cb.setFocusable(false);
+		cb.setFocusableInTouchMode(false);
+		cb.setClickable(false);
+		cb.setVisibility(View.GONE);
+		LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+		lp.gravity = Gravity.CENTER_VERTICAL;
+		lp.rightMargin = dp(4);
+		row.addView(cb, 0, lp);
+		return cb;
+	}
+
+	/**
+	 * Show check box state of the item in selection mode.
+	 */
+	public void decorate(android.widget.CheckBox check, FileInfo item) {
+		if (check == null)
 			return;
-		if (mActive && isSelected(item))
-			view.setBackgroundColor(SELECTED_ITEM_COLOR);
-		else
-			view.setBackgroundDrawable(null);
+		if (mActive && isSelectable(item)) {
+			check.setVisibility(View.VISIBLE);
+			check.setChecked(isSelected(item));
+		} else {
+			check.setVisibility(View.GONE);
+		}
 	}
 
 	private void update() {
 		if (mBar != null) {
 			mBar.setVisibility(mActive ? View.VISIBLE : View.GONE);
 			if (mCountView != null)
-				mCountView.setText(String.valueOf(mSelected.size()));
+				mCountView.setText(mActivity.getString(R.string.fb_sel_count, mSelected.size()));
 		}
 		mBrowser.invalidateList();
 	}
@@ -212,9 +222,9 @@ public class FileBrowserSelection {
 		LinearLayout buttons = new LinearLayout(mActivity);
 		buttons.setOrientation(LinearLayout.HORIZONTAL);
 		buttons.addView(makeButton(mActivity.getString(R.string.fb_sel_all), v -> toggleAll()));
-		buttons.addView(makeButton(mActivity.getString(R.string.fb_sel_status), v -> askStatus()));
 		buttons.addView(makeButton(mActivity.getString(R.string.fb_sel_move), v -> askMove()));
 		buttons.addView(makeButton(mActivity.getString(R.string.fb_sel_delete), v -> askDelete()));
+		buttons.addView(makeButton(mActivity.getString(R.string.fb_sel_status), v -> askStatus()));
 		HorizontalScrollView scroll = new HorizontalScrollView(mActivity);
 		scroll.setHorizontalScrollBarEnabled(false);
 		scroll.addView(buttons);

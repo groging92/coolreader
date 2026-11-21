@@ -97,9 +97,12 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 				//mActivity.loadDocument(item);
 				selectedItem = item;
 
-				// long tap on a book starts multiple selection; in selection mode it opens book info
-				if (!mSelection.isActive() && FileBrowserSelection.isSelectable(item)) {
-					mSelection.start(item);
+				// long tap on a book starts multiple selection (check boxes on the left)
+				if (FileBrowserSelection.isSelectable(item)) {
+					if (mSelection.isActive())
+						mSelection.toggle(item);
+					else
+						mSelection.start(item);
 					return true;
 				}
 
@@ -1107,6 +1110,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 			TextView field2;
 			//TextView field3;
 			ImageView infoButton;
+			android.widget.CheckBox check; // multiple selection mode
 			void setText( TextView view, String text )
 			{
 				if ( view==null )
@@ -1304,6 +1308,8 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 				holder.field2 = view.findViewById(R.id.browser_item_field2);
 				//holder.field3 = (TextView)view.findViewById(R.id.browser_item_field3);
 				holder.infoButton = view.findViewById(R.id.browser_item_button_info);
+				if ((vt == VIEW_TYPE_FILE || vt == VIEW_TYPE_FILE_SIMPLE) && view instanceof LinearLayout)
+					holder.check = mSelection.addCheckBox((LinearLayout) view);
 				view.setTag(holder);
 			} else {
 				view = convertView;
@@ -1317,7 +1323,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 				parentItem = currDirectory;
 			}
 			holder.setItem(item, parentItem);
-			mSelection.decorate(view, item);
+			mSelection.decorate(holder.check, item);
 //			if ( DeviceInfo.FORCE_HC_THEME ) {
 //				view.setBackgroundColor(Color.WHITE);
 //			}

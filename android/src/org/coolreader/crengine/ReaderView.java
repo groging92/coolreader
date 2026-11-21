@@ -2649,7 +2649,11 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 
 			public void work() {
 				BackgroundThread.ensureBackground();
+				long forkT0 = android.os.SystemClock.uptimeMillis();
 				res = doc.doCommand(cmd.nativeId, param);
+				long forkDt = android.os.SystemClock.uptimeMillis() - forkT0;
+				if (forkDt >= 30)
+					FileLog.perf("cmd." + cmd.name(), forkDt, "param=" + param);
 				switch (cmd) {
 					case DCMD_BEGIN:
 					case DCMD_LINEUP:
@@ -2680,7 +2684,10 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 
 			public void done() {
 				if (res) {
-					invalidImages = true;
+					// fork: moving to another page doesn't change page images, keep them
+					// (prerendered next page is found by position)
+					if (!isMoveCommand)
+						invalidImages = true;
 					drawPage(doneHandler, false);
 				}
 				if (isMoveCommand && isBookLoaded())
@@ -3402,6 +3409,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		Bitmap bitmap;
 		PositionProperties position;
 		ImageInfo imageInfo;
+		long renderedAt; // fork: page header may show a clock, don't reuse too old prerendered pages
 
 		void recycle() {
 			factory.release(bitmap);
@@ -3434,6 +3442,40 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 	 * @param offset is kind of page: 0==current, -1=previous, 1=next page
 	 * @return page image and properties, null if requested page is unavailable (e.g. requested next/prev page is out of document range)
 	 */
+	// fork: prerendered page images older than this are rendered again (header clock/battery)
+	private static final long FORK_MAX_PAGE_IMAGE_AGE = 90000;
+
+	private static boolean forkFresh(BitmapInfo bi) {
+		return bi.renderedAt == 0 || android.os.SystemClock.uptimeMillis() - bi.renderedAt < FORK_MAX_PAGE_IMAGE_AGE;
+	}
+
+	private int forkPrefetchSeq = 0;
+
+	/**
+	 * Fork: after a page is shown, render the next page in background,
+	 * so the next page turn doesn't wait for rendering.
+	 */
+	private void forkPrefetchNextPage() {
+		final int seq = ++forkPrefetchSeq;
+		BackgroundThread.instance().postBackground(() -> {
+			if (seq != forkPrefetchSeq || !mOpened || currentAnimation != null || currentImageViewer != null)
+				return;
+			try {
+				PositionProperties pp = doc.getPositionProps(null, false);
+				if (pp == null || pp.pageMode == 0 || pp.pageNumber + 1 >= pp.pageCount)
+					return;
+				long t0 = android.os.SystemClock.uptimeMillis();
+				preparePageImage(0);
+				preparePageImage(1);
+				long dt = android.os.SystemClock.uptimeMillis() - t0;
+				if (dt >= 5)
+					FileLog.perf("page.prefetch", dt, "page=" + (pp.pageNumber + 1) + "/" + pp.pageCount);
+			} catch (Exception e) {
+				log.w("page prefetch failed", e);
+			}
+		});
+	}
+
 	private BitmapInfo preparePageImage(int offset) {
 		BackgroundThread.ensureBackground();
 		log.v("preparePageImage( " + offset + ")");
@@ -3493,7 +3535,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		BitmapInfo currposBitmap = null;
 		if (mCurrentPageInfo != null && mCurrentPageInfo.position != null && mCurrentPageInfo.position.equals(currpos) && mCurrentPageInfo.imageInfo == null)
 			currposBitmap = mCurrentPageInfo;
-		else if (mNextPageInfo != null && mNextPageInfo.position != null && mNextPageInfo.position.equals(currpos) && mNextPageInfo.imageInfo == null)
+		else if (mNextPageInfo != null && mNextPageInfo.position != null && mNextPageInfo.position.equals(currpos) && mNextPageInfo.imageInfo == null && forkFresh(mNextPageInfo))
 			currposBitmap = mNextPageInfo;
 		if (offset == 0) {
 			// Current page requested
@@ -3517,6 +3559,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 					internalDY > 0 ? internalDY : requestedHeight);
 			doc.setBatteryState(mBatteryState, mBatteryChargingConn, mBatteryChargeLevel);
 			doc.getPageImage(bi.bitmap);
+			bi.renderedAt = android.os.SystemClock.uptimeMillis();
 			mCurrentPageInfo = bi;
 			//log.v("Prepared new current page image " + mCurrentPageInfo);
 			return mCurrentPageInfo;
@@ -3533,7 +3576,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 				BitmapInfo nextposBitmap = null;
 				if (mCurrentPageInfo != null && mCurrentPageInfo.position != null && mCurrentPageInfo.position.equals(nextpos))
 					nextposBitmap = mCurrentPageInfo;
-				else if (mNextPageInfo != null && mNextPageInfo.position != null && mNextPageInfo.position.equals(nextpos))
+				else if (mNextPageInfo != null && mNextPageInfo.position != null && mNextPageInfo.position.equals(nextpos) && forkFresh(mNextPageInfo))
 					nextposBitmap = mNextPageInfo;
 				if (nextposBitmap == null) {
 					// existing image not found in cache, overriding mNextPageInfo
@@ -3545,6 +3588,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 					bi.bitmap = factory.get(internalDX, internalDY);
 					doc.setBatteryState(mBatteryState, mBatteryChargingConn, mBatteryChargeLevel);
 					doc.getPageImage(bi.bitmap);
+			bi.renderedAt = android.os.SystemClock.uptimeMillis();
 					mNextPageInfo = bi;
 					nextposBitmap = bi;
 					//log.v("Prepared new current page image " + mNextPageInfo);
@@ -3564,7 +3608,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 				BitmapInfo nextposBitmap = null;
 				if (mCurrentPageInfo != null && mCurrentPageInfo.position != null && mCurrentPageInfo.position.equals(nextpos))
 					nextposBitmap = mCurrentPageInfo;
-				else if (mNextPageInfo != null && mNextPageInfo.position != null && mNextPageInfo.position.equals(nextpos))
+				else if (mNextPageInfo != null && mNextPageInfo.position != null && mNextPageInfo.position.equals(nextpos) && forkFresh(mNextPageInfo))
 					nextposBitmap = mNextPageInfo;
 				if (nextposBitmap == null) {
 					// existing image not found in cache, overriding mNextPageInfo
@@ -3576,6 +3620,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 					bi.bitmap = factory.get(internalDX, internalDY);
 					doc.setBatteryState(mBatteryState, mBatteryChargingConn, mBatteryChargeLevel);
 					doc.getPageImage(bi.bitmap);
+			bi.renderedAt = android.os.SystemClock.uptimeMillis();
 					mNextPageInfo = bi;
 					nextposBitmap = bi;
 				}
@@ -3621,10 +3666,11 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 				log.d("skipping drawPage request while scroll animation is in progress");
 				return;
 			}
-			log.e("DrawPageTask.work(" + internalDX + "," + internalDY + ")");
+			log.d("DrawPageTask.work(" + internalDX + "," + internalDY + ")");
 			bi = preparePageImage(0);
 			if (bi != null) {
 				bookView.draw(isPartially);
+				forkPrefetchNextPage();
 			}
 		}
 
@@ -4335,14 +4381,18 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			return started;
 		}
 
+		final long forkStart = android.os.SystemClock.uptimeMillis();
+
 		ViewAnimationBase() {
 			//startTimeStamp = android.os.SystemClock.uptimeMillis();
 			cancelGc();
 		}
 
 		public void close() {
+			FileLog.perf("anim." + getClass().getSimpleName(), android.os.SystemClock.uptimeMillis() - forkStart, "");
 			animationScheduler.cancel();
 			currentAnimation = null;
+			forkPrefetchNextPage();
 			scheduleSaveCurrentPositionBookmark(DEF_SAVE_POSITION_INTERVAL);
 			lastSavedBookmark = null;
 			updateCurrentPositionStatus();
@@ -4557,6 +4607,8 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			this.pageCount = currPos.pageMode;
 			image1 = preparePageImage(0);
 			image2 = preparePageImage(direction);
+			FileLog.perf("page.turn.prepare", android.os.SystemClock.uptimeMillis() - start,
+					"dir=" + direction + " page=" + page1 + "->" + page2 + "/" + currPos.pageCount);
 			if (image1 == null || image2 == null) {
 				log.v("PageViewAnimation -- cannot start animation: page image is null");
 				return;
@@ -5174,6 +5226,10 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 	}
 
 	private class LoadDocumentTask extends Task {
+		// fork telemetry: book opening timings
+		final long forkCreated = android.os.SystemClock.uptimeMillis();
+		long forkWorkStart, forkLoaded, forkFirstPage, forkRestored;
+		int forkPages = -1;
 		String filename;
 		String path;
 		byte[] docBuffer;
@@ -5241,6 +5297,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		@Override
 		public void work() throws IOException {
 			BackgroundThread.ensureBackground();
+			forkWorkStart = android.os.SystemClock.uptimeMillis();
 			coverPageBytes = null;
 			log.i("Loading document " + filename);
 			doc.doCommand(ReaderCommand.DCMD_SET_INTERNAL_STYLES.nativeId, disableInternalStyles ? 0 : 1);
@@ -5256,6 +5313,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 				success = doc.loadDocumentFromBuffer(docBuffer, filename);
 			else
 				success = doc.loadDocument(filename);
+			forkLoaded = android.os.SystemClock.uptimeMillis();
 			if (success) {
 				log.v("loadDocumentInternal completed successfully");
 
@@ -5270,6 +5328,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 					doc.resize(internalDX, internalDY);
 				}
 				preparePageImage(0);
+				forkFirstPage = android.os.SystemClock.uptimeMillis();
 				log.v("updating loaded book info");
 				updateLoadedBookInfo(null != docBuffer);
 				if (null == docBuffer) {
@@ -5278,6 +5337,13 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 					if (pos != null) {
 						log.i("Restoring position : " + pos);
 						restorePositionBackground(pos);
+					}
+					forkRestored = android.os.SystemClock.uptimeMillis();
+					try {
+						PositionProperties pp = doc.getPositionProps(null, false);
+						if (pp != null)
+							forkPages = pp.pageCount;
+					} catch (Exception ignored) {
 					}
 				} else {
 					// Opened from memory buffer
@@ -5298,6 +5364,22 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		public void done() {
 			BackgroundThread.ensureGUI();
 			log.d("LoadDocumentTask, GUI thread is finished successfully");
+			try {
+				long now = android.os.SystemClock.uptimeMillis();
+				FileInfo fi = mBookInfo != null ? mBookInfo.getFileInfo() : null;
+				FileLog.perf("book.open", now - forkCreated,
+						"file=\"" + (fi != null ? fi.filename : filename) + "\""
+						+ " size=" + (fi != null ? fi.size : -1)
+						+ " fmt=" + (fi != null ? fi.format : "?")
+						+ " queue=" + (forkWorkStart - forkCreated)
+						+ " load+format=" + (forkLoaded - forkWorkStart)
+						+ " firstPage=" + (forkFirstPage > 0 ? forkFirstPage - forkLoaded : -1)
+						+ " restorePos=" + (forkRestored > 0 ? forkRestored - forkFirstPage : -1)
+						+ " gui=" + (now - Math.max(forkRestored, forkFirstPage))
+						+ " pages=" + forkPages
+						+ " screen=" + internalDX + "x" + internalDY);
+			} catch (Exception ignored) {
+			}
 			if (!Services.isStopped()) {
 				if (null == docBuffer) {
 					// Opened from existing file

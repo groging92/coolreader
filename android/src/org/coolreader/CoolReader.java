@@ -212,6 +212,7 @@ public class CoolReader extends BaseActivity {
 	 */
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
+		org.coolreader.crengine.FileLog.init(getApplicationContext());
 		startServices();
 
 		log.i("CoolReader.onCreate() entered");
@@ -879,6 +880,7 @@ public class CoolReader extends BaseActivity {
 
 	@Override
 	protected void onPause() {
+		org.coolreader.crengine.FileLog.setForeground(false);
 		activityIsRunning = false;
 		if (mReaderView != null) {
 			mReaderView.onAppPause();
@@ -951,6 +953,7 @@ public class CoolReader extends BaseActivity {
 		else
 			log.i("CoolReader.onResume(), mFileToOpenFromExt=" + mFileToOpenFromExt);
 		super.onResume();
+		org.coolreader.crengine.FileLog.setForeground(true);
 		//Properties props = SettingsManager.instance(this).get();
 
 		if (mAllFilesAccessRequested && Build.VERSION.SDK_INT >= Build.VERSION_CODES.R
@@ -2114,7 +2117,42 @@ public class CoolReader extends BaseActivity {
 		}
 	}
 
+	/**
+	 * Fork: collect our log files + logcat into one text file and open the share sheet.
+	 */
+	public void shareLogs() {
+		showToast(R.string.fork_logs_preparing);
+		new Thread(() -> {
+			try {
+				File f = org.coolreader.crengine.FileLog.buildBundle(getApplicationContext());
+				Uri uri = org.coolreader.crengine.LogsProvider.uriFor(this, f);
+				Intent send = new Intent(Intent.ACTION_SEND);
+				send.setType("text/plain");
+				send.putExtra(Intent.EXTRA_STREAM, uri);
+				send.putExtra(Intent.EXTRA_SUBJECT, f.getName());
+				send.setClipData(android.content.ClipData.newRawUri(f.getName(), uri));
+				send.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+				runOnUiThread(() -> {
+					try {
+						startActivity(Intent.createChooser(send, getString(R.string.action_logcat)));
+					} catch (Exception e) {
+						log.e("Cannot share logs", e);
+						showToast(e.toString());
+					}
+				});
+			} catch (Exception e) {
+				log.e("Cannot build log bundle", e);
+				runOnUiThread(() -> showToast(e.toString()));
+			}
+		}, "share-logs").start();
+	}
+
 	public void createLogcatFile() {
+		// fork: "Send logs" instead of saving logcat to Downloads
+		if (true) {
+			shareLogs();
+			return;
+		}
 		final SimpleDateFormat format = new SimpleDateFormat("'cr3-'yyyy-MM-dd_HH_mm_ss'.log'", Locale.US);
 		FileInfo dir = Services.getScanner().getSharedDownloadDirectory();
 		if (null == dir) {

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
     <string name="fork_app_name">CoolReaderFork</string>
+    <string name="fb_sel_count">%d selected</string>
     <string name="fb_sel_all">All</string>
     <string name="fb_sel_status">Status</string>
     <string name="fb_sel_move">Move</string>
@@ -14,4 +15,5 @@
     <string name="fb_sel_moved">Moved: %1$d, failed: %2$d</string>
     <string name="fb_sel_cannot_list">Cannot open folder</string>
     <string name="all_files_access_request">To show books from phone storage, allow access to all files for CoolReaderFork</string>
+    <string name="fork_logs_preparing">Collecting logs…</string>
 </resources>

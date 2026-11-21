@@ -28,21 +28,27 @@ public class L {
 	}
 	public static void i(String msg) {
 		Log.i(TAG, getThreadLabel() + msg);
+		FileLog.write('I', TAG, msg, null);
 	}
 	public static void i(String msg, Exception e) {
 		Log.i(TAG, getThreadLabel() + msg, e);
+		FileLog.write('I', TAG, msg, e);
 	}
 	public static void w(String msg) {
 		Log.w(TAG, getThreadLabel() + msg);
+		FileLog.write('W', TAG, msg, null);
 	}
 	public static void w(String msg, Exception e) {
 		Log.w(TAG, getThreadLabel() + msg, e);
+		FileLog.write('W', TAG, msg, e);
 	}
 	public static void e(String msg) {
 		Log.e(TAG, getThreadLabel() + msg);
+		FileLog.write('E', TAG, msg, null);
 	}
 	public static void e(String msg, Exception e) {
 		Log.e(TAG, getThreadLabel() + msg, e);
+		FileLog.write('E', TAG, msg, e);
 	}
 	public static void d(String msg) {
 		Log.d(TAG, getThreadLabel() + msg);

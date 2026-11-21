@@ -188,6 +188,12 @@
                 <action android:name="android.intent.action.PHONE_STATE" />
             </intent-filter>
         </receiver>
+        <!-- fork: share log bundle ("Send logs") -->
+        <provider
+            android:name="org.coolreader.crengine.LogsProvider"
+            android:authorities="${applicationId}.logs"
+            android:exported="false"
+            android:grantUriPermissions="true" />
     </application>
 
 </manifest>

@@ -1045,7 +1045,8 @@ public class Engine {
 		return setKeyBacklightInternal(value);
 	}
 
-	final static int CACHE_DIR_SIZE = 32000000;
+	// fork: was 32MB, which holds only a few formatted big books; evicted books are formatted again on open
+	final static int CACHE_DIR_SIZE = 512 * 1024 * 1024;
 
 	private static String createCacheDir(File baseDir, String subDir) {
 		String cacheDirName = null;
