@@ -135,8 +135,16 @@ public class Scanner extends FileInfoChangeSource {
 	public boolean listDirectory(FileInfo baseDir, boolean onlySupportedFormats, boolean scanzip, boolean rescan)
 	{
 		Set<String> knownItems = null;
+		// fork: book files shown before the rescan, with scanned info (title, authors, state)
+		java.util.HashMap<String, FileInfo> previousFiles = null;
 		if ( baseDir.isListed ) {
 			if (rescan) {
+				previousFiles = new java.util.HashMap<>();
+				for (int i = 0; i < baseDir.fileCount(); i++) {
+					FileInfo f = baseDir.getFile(i);
+					if (f != null && !f.isArchive && f.getPathName() != null)
+						previousFiles.put(f.getPathName(), f);
+				}
 				baseDir.clear();
 			} else {
 				knownItems = new HashSet<String>();
@@ -184,12 +192,17 @@ public class Scanner extends FileInfoChangeSource {
 							continue;
 						}
 						boolean isArc = Engine.isArchive(pathName);
-						// fork: on rescan keep already scanned book info (title, authors, state) for unchanged
-						// regular files; only archives need a real rescan (they may turn into folders).
-						// Upstream dropped it, and re-opened folders showed bare file names.
-						FileInfo item = mFileList.get(pathName);
-						if (item != null && rescan && (isArc || item.isArchive || item.size != f.length()))
-							item = null;
+						FileInfo item;
+						if (rescan) {
+							// keep scanned info of unchanged regular files; only archives need a real
+							// rescan (they may turn into folders). Without this re-opened folders
+							// showed bare file names instead of titles.
+							item = previousFiles != null && !isArc ? previousFiles.get(pathName) : null;
+							if (item != null && item.size != f.length())
+								item = null;
+						} else {
+							item = mFileList.get(pathName);
+						}
 						boolean isNew = false;
 						if ( item==null ) {
 							item = new FileInfo( f );
